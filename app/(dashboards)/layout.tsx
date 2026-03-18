@@ -12,3 +12,5 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
         </div>
     )
 }
+
+//TODO: next steps: create some cards in a scrolling section that will house the sports facilities, and add some basic navigation buttons to the sidebar.
