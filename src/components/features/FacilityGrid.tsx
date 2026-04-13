@@ -1,4 +1,4 @@
-import { Facility } from "@/app/types"
+import { Facility } from "@/types"
 import FacilityCard from "./FacilityCard"
 import styles from "./FacilityGrid.module.css"
 
