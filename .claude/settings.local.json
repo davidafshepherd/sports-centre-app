@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.ideal-postcodes.co.uk)",
+      "WebFetch(domain:core-interface.ideal-postcodes.co.uk)",
+      "WebFetch(domain:ideal-postcodes.co.uk)"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-import { Facility } from "@/app/types";
+import { Facility } from "@/types";
 import styles from "./FacilityCard.module.css"
 
 interface FacilityCardProps {
