@@ -3,16 +3,16 @@
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signOut } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { X } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
-import { registerFormSchema, RegisterForm } from "../../features/auth/schemas/registerFormSchema";
+import { registerFormSchema, RegisterForm } from "@/features/auth/schemas/registerFormSchema";
 import PersonalDetailsFieldset from "./fieldsets/PersonalDetailsFieldset";
 import AccountDetailsFieldset from "./fieldsets/AccountDetailsFieldset";
 import AddressFieldset from "./fieldsets/AddressFieldset";
-import { registerFirebaseError } from "../../features/auth/utils/mapFirebaseErrors";
+import { registerFirebaseError } from "@/features/auth/utils/mapFirebaseErrors";
 
 // Shape of component's props
 interface Props {
@@ -63,6 +63,9 @@ export default function RegisterFormCard({ onClose }: Props) {
                 membershipStatus: "active",
                 createdAt: new Date().toISOString(),
             });
+
+            // Sign user out so Firestore has time to save their profile
+            await signOut(auth)
 
             // Close register modal
             onClose();

@@ -6,7 +6,7 @@ import HomeView from "@/components/home/HomeView";
 
 export default function Page() {
     // Access authentication context
-    const { currentUser, isAuthResolved } = useAuth();
+    const { currentUser, userProfile, isAuthResolved } = useAuth();
 
     // Render a loading screen if authentication is incomplete 
     if (!isAuthResolved) {
@@ -19,7 +19,7 @@ export default function Page() {
     }
 
     // Render dashboard view if user is logged in
-    if (currentUser) return <DashboardView />;
+    if (currentUser && userProfile) return <DashboardView />;
 
     // Render home view if no user is logged in
     return <HomeView />;
