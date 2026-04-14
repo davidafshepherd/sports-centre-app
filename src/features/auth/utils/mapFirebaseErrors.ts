@@ -23,3 +23,18 @@ export function loginFirebaseError(code: string): string {
             return "Sign in failed. Please try again.";
     }
 }
+
+// Map Firebase Google sign-in error codes to user-friendly messages
+export function googleSignInFirebaseError(code: string): string {
+    switch (code) {
+        case "auth/popup-closed-by-user":
+        case "auth/cancelled-popup-request":
+            return "Sign in was cancelled.";
+        case "auth/popup-blocked":
+            return "Sign-in popup was blocked by the browser. Please allow popups and try again.";
+        case "auth/too-many-requests":
+            return "Too many attempts. Please try again later.";
+        default:
+            return "Google sign in failed. Please try again.";
+    }
+}
