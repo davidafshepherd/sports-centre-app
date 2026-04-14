@@ -3,11 +3,9 @@
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createUserWithEmailAndPassword, updateProfile, signOut } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { X } from "lucide-react";
-import { auth, db } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
 import { registerFormSchema, RegisterForm } from "@/features/auth/schemas/registerFormSchema";
 import PersonalDetailsFieldset from "./fieldsets/PersonalDetailsFieldset";
 import AccountDetailsFieldset from "./fieldsets/AccountDetailsFieldset";
@@ -20,6 +18,9 @@ interface Props {
 }
 
 export default function RegisterFormCard({ onClose }: Props) {
+    // Functions used to register user
+    const { register } = useAuth();
+
     // Submission error message
     const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -43,30 +44,9 @@ export default function RegisterFormCard({ onClose }: Props) {
     async function onSubmit(data: RegisterForm) {
         // Reset form submission error
         setSubmitError(null);
-
         try {
-            // Create Firebase Auth user
-            const { user } = await createUserWithEmailAndPassword(auth, data.email, data.password);
-
-            // Update user's Firebase Auth profile with a display name
-            await updateProfile(user, { displayName: `${data.firstName} ${data.lastName}` });
-
-            // Save user's profile to Firestore
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                firstName: data.firstName,
-                lastName: data.lastName,
-                email: data.email,
-                dateOfBirth: data.dateOfBirth,
-                address: data.address,
-                role: "member",
-                membershipStatus: "active",
-                createdAt: new Date().toISOString(),
-            });
-
-            // Sign user out so Firestore has time to save their profile
-            await signOut(auth)
-
+            // Sign user up
+            await register(data);
             // Close register modal
             onClose();
         } catch (error) {
