@@ -5,6 +5,13 @@ import { UseFormRegister, UseFormSetValue, FieldErrors } from "react-hook-form";
 import { RegisterForm } from "../../../features/auth/schemas/registerFormSchema";
 import { inputClass, FieldError } from "../formHelpers";
 
+// Shape of component's props
+interface Props {
+    register: UseFormRegister<RegisterForm>;    // Function used to connect inputs to form state
+    errors: FieldErrors<RegisterForm>;          // Input validation errors
+    setValue: UseFormSetValue<RegisterForm>;    // Function used to update form values programmatically
+}
+
 // Shape of data returned by IdealPostcodes API
 interface AddressResult {
     line_1: string;
@@ -13,13 +20,6 @@ interface AddressResult {
     post_town: string;
     county: string;
     postcode: string;
-}
-
-// Shape of component's props
-interface Props {
-    register: UseFormRegister<RegisterForm>;    // Function used to connect inputs to form state
-    errors: FieldErrors<RegisterForm>;          // Input validation errors
-    setValue: UseFormSetValue<RegisterForm>;    // Function used to update form values programmatically
 }
 
 export default function AddressFieldset({ register, errors, setValue }: Props) {
