@@ -1,4 +1,4 @@
-import FacilityGrid from "@/components/features/FacilityGrid";
+import FacilityGrid from "@/features/FacilityGrid";
 import { Facility } from "@/types";
 
 // TODO: replace with real facilities created by an admin

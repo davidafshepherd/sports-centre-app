@@ -8,7 +8,7 @@ import { UserProfile } from "@/types/user";
 
 // Define shape of authentication context
 interface AuthContextValue {
-    currentUser: User | null;                // Firebase Authentication user
+    currentUser: User | null;                // Firebase Auth user
     userProfile: UserProfile | null;         // User's profile (stored in Firestore)
     isAuthResolved: boolean;                 // Whether authentication is complete
     login: (email: string, password: string) => Promise<void>;
@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Check if a user is logged in
             if (user) {
                 // Fetch profile from Firestore using UID
-                const snap = await getDoc(doc(db, "users", user.uid));
-                setUserProfile(snap.exists() ? (snap.data() as UserProfile) : null);
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                setUserProfile(docSnap.exists() ? (docSnap.data() as UserProfile) : null);
             } else {
                 // Clear profile when no user is logged in
                 setUserProfile(null);
