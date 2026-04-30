@@ -5,7 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FirebaseError } from "firebase/app";
 import { X } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/providers/AuthProvider";
 import { registerFormSchema, RegisterForm } from "@/features/auth/schemas/registerFormSchema";
 import PersonalDetailsFieldset from "./fieldsets/PersonalDetailsFieldset";
 import AccountDetailsFieldset from "./fieldsets/AccountDetailsFieldset";
