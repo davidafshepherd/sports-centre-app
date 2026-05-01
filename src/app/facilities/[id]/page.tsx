@@ -9,7 +9,7 @@ import LoadingScreen from "@/components/ui/LoadingScreen"
 
 // Shape of component's props
 interface Props {
-    params: Promise<{ id: string }> // Promise containing the facility's ID
+    params: Promise<{ id: string }>;    // Promise containing the facility's ID
 }
 
 export default function FacilityDetailPage({ params }: Props) {
