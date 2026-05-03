@@ -17,7 +17,7 @@ import { getFacilities, getFacilityById } from "@/lib/facilities"
 import type { Booking, BookingRequest } from "@/types/booking"
 import type { Facility } from "@/types/facility"
 import {
-    formatSlot,
+    formatSlot, formatDateTime,
     bookingStatusColour, bookingStatusLabel,
     requestStatuscolour, requestStatusLabel,
     getMinBookingDate, getMaxBookingDate,
@@ -25,6 +25,7 @@ import {
 import {
     CalendarDays, CheckCircle, XCircle, Repeat,
     Clock, MapPin, CheckCircle2,
+    ChevronDown, ArrowUp, ArrowDown, Search,
 } from "lucide-react"
 
 // ── Category config ────────────────────────────────────────────────────────
@@ -122,7 +123,7 @@ function SideThumb({ category, name }: { category?: string; name: string }) {
 function formatCardDate(dateStr: string): string {
     const [y, m, d] = dateStr.split("-").map(Number)
     return new Date(y, m - 1, d).toLocaleDateString("en-GB", {
-        weekday: "short", day: "numeric", month: "short",
+        weekday: "short", day: "numeric", month: "short", year: "numeric",
     })
 }
 
@@ -294,13 +295,13 @@ function ConfirmSlotModal({ request, onClose, onDone }: {
                             slotDurationMins={slotDurMins} />
                     )}
                     <div className="flex gap-3 pt-1">
-                        <button type="button" onClick={onClose}
-                            className="flex-1 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer">
-                            Cancel
-                        </button>
                         <button type="submit" disabled={submitting || slotStart === -1 || !date}
                             className="flex-1 py-2.5 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
                             {submitting ? "Confirming…" : "Confirm Booking"}
+                        </button>
+                        <button type="button" onClick={onClose}
+                            className="flex-1 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer">
+                            Cancel
                         </button>
                     </div>
                 </form>
@@ -361,9 +362,7 @@ function AlternativeSuggestionModal({ request, facilities, onClose, onDone }: {
 
     useEffect(() => {
         const dates = getNext7Dates()
-        const targets = facilities.filter(
-            f => f.category === facilities.find(x => x.id === request.facilityId)?.category && f.isActive
-        )
+        const targets = facilities.filter(f => f.category === requestedCategory && f.isActive)
         if (targets.length === 0) { setLoadingAvailability(false); return }
         Promise.all(
             targets.map(f =>
@@ -377,7 +376,7 @@ function AlternativeSuggestionModal({ request, facilities, onClose, onDone }: {
             setAvailability(Object.fromEntries(entries))
             setLoadingAvailability(false)
         })
-    }, [request.facilityId, facilities])
+    }, [requestedCategory, facilities])
 
     async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -400,12 +399,11 @@ function AlternativeSuggestionModal({ request, facilities, onClose, onDone }: {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-xl overflow-hidden">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-xl overflow-hidden" onClick={e => e.stopPropagation()}>
                 <CardPhoto category={requestedCategory} name={request.facilityName} />
                 <div className="px-6 pt-4 pb-1 flex-shrink-0">
                     <h2 className="font-semibold text-slate-900">Suggest Alternative Facility</h2>
-                    <p className="text-sm text-slate-500 mt-0.5">{request.memberName} · {request.activityDescription}</p>
                 </div>
                 <form onSubmit={handleSubmit} className="px-6 pb-6 pt-4 space-y-4 overflow-y-auto flex-1">
                     {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">{error}</p>}
@@ -457,13 +455,13 @@ function AlternativeSuggestionModal({ request, facilities, onClose, onDone }: {
                             className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none" />
                     </div>
                     <div className="flex gap-3 pt-1">
-                        <button type="button" onClick={onClose}
-                            className="flex-1 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer">
-                            Cancel
-                        </button>
                         <button type="submit" disabled={submitting || !selectedFacilityId}
                             className="flex-1 py-2.5 bg-sky-600 text-white rounded-xl text-sm font-medium hover:bg-sky-700 disabled:hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
                             {submitting ? "Sending…" : "Send Suggestion"}
+                        </button>
+                        <button type="button" onClick={onClose}
+                            className="flex-1 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer">
+                            Cancel
                         </button>
                     </div>
                 </form>
@@ -487,8 +485,8 @@ function RejectModal({ title, placeholder, onClose, onConfirm }: {
         await onConfirm(note)
     }
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
                 <div className="px-6 py-5 border-b border-slate-100">
                     <h2 className="font-semibold text-slate-900">{title}</h2>
                 </div>
@@ -497,13 +495,13 @@ function RejectModal({ title, placeholder, onClose, onConfirm }: {
                         placeholder={placeholder}
                         className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none" />
                     <div className="flex gap-3">
-                        <button onClick={onClose}
-                            className="flex-1 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer">
-                            Cancel
-                        </button>
                         <button onClick={handleConfirm} disabled={submitting}
                             className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
                             {submitting ? "Confirming…" : "Confirm"}
+                        </button>
+                        <button onClick={onClose}
+                            className="flex-1 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors cursor-pointer">
+                            Cancel
                         </button>
                     </div>
                 </div>
@@ -525,6 +523,21 @@ function MemberBookingsTab() {
     const [cancellingRequest, setCancellingRequest] = useState<string | null>(null)
     const [responding, setResponding]           = useState<string | null>(null)
     const [confirmSlotTarget, setConfirmSlotTarget] = useState<BookingRequest | null>(null)
+    const [expandedId, setExpandedId]           = useState<string | null>(null)
+    const [sortDir, setSortDir]                 = useState<SortDir>("desc")
+    const [colWidths, setColWidths]             = useState({ facility: 176, location: 144, status: 140, created: 160 })
+    const startResize = makeResizer<typeof colWidths>(setColWidths)
+    const [upcomingSortDir, setUpcomingSortDir]                 = useState<SortDir>("asc")
+    const [upcomingFilterCategory, setUpcomingFilterCategory]   = useState("")
+    const [upcomingColWidths, setUpcomingColWidths]             = useState({ facility: 176, location: 144, date: 136, time: 148, category: 132 })
+    const startUpcomingResize = makeResizer<typeof upcomingColWidths>(setUpcomingColWidths)
+    const [expandedUpcomingId, setExpandedUpcomingId]           = useState<string | null>(null)
+    const [historySortDir, setHistorySortDir]                   = useState<SortDir>("desc")
+    const [historyFilterCategory, setHistoryFilterCategory]     = useState("")
+    const [historyFilterStatus, setHistoryFilterStatus]         = useState("")
+    const [historyColWidths, setHistoryColWidths]               = useState({ facility: 176, location: 144, category: 132, date: 136, time: 148 })
+    const startHistoryResize = makeResizer<typeof historyColWidths>(setHistoryColWidths)
+    const [expandedHistoryId, setExpandedHistoryId]             = useState<string | null>(null)
 
     async function load() {
         if (!user) return
@@ -575,10 +588,33 @@ function MemberBookingsTab() {
     )
     const rejectedRequests  = requests.filter(r => r.status === "rejected")
     const visibleRequests   = [...actionableRequests, ...rejectedRequests]
+        .sort((a, b) => sortDir === "desc"
+            ? b.updatedAt.localeCompare(a.updatedAt)
+            : a.updatedAt.localeCompare(b.updatedAt))
     const upcomingBookings  = bookings.filter(b => b.status === "upcoming")
-    const historyBookings   = bookings
-        .filter(b => b.status !== "upcoming")
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    const upcomingCategoryOptions = [...new Set(
+        upcomingBookings.map(b => facilityMap[b.facilityId]?.category).filter(Boolean),
+    )].sort() as string[]
+    const filteredUpcoming = upcomingBookings
+        .filter(b => upcomingFilterCategory === "" || facilityMap[b.facilityId]?.category === upcomingFilterCategory)
+        .sort((a, b) => {
+            const ka = a.date + String(a.slotStart).padStart(5, "0")
+            const kb = b.date + String(b.slotStart).padStart(5, "0")
+            return upcomingSortDir === "asc" ? ka.localeCompare(kb) : kb.localeCompare(ka)
+        })
+    const historyBookings   = bookings.filter(b => b.status !== "upcoming")
+    const historyCategoryOptions = [...new Set(
+        historyBookings.map(b => facilityMap[b.facilityId]?.category).filter(Boolean),
+    )].sort() as string[]
+    const historyStatusOptions = [...new Set(historyBookings.map(b => b.status))].sort()
+    const filteredHistory = historyBookings
+        .filter(b => historyFilterCategory === "" || facilityMap[b.facilityId]?.category === historyFilterCategory)
+        .filter(b => historyFilterStatus === "" || b.status === historyFilterStatus)
+        .sort((a, b) => {
+            const ka = a.date + String(a.slotStart).padStart(5, "0")
+            const kb = b.date + String(b.slotStart).padStart(5, "0")
+            return historySortDir === "desc" ? kb.localeCompare(ka) : ka.localeCompare(kb)
+        })
 
     const tabs = [
         { id: "requests", label: "Requests", count: actionableRequests.length },
@@ -593,251 +629,387 @@ function MemberBookingsTab() {
             <Tabs tabs={tabs} active={tab} onChange={setTab} />
 
             {tab === "requests" && (
-                <div className="space-y-3">
-                    {visibleRequests.length === 0
-                        ? <EmptyState icon={<CalendarDays className="w-10 h-10 text-slate-300" />}
-                            message="No booking requests yet."
-                            action={{ label: "Browse facilities", href: "/facilities" }} />
-                        : visibleRequests.map(req => {
-                            const category = facilityMap[req.facilityId]?.category
-                            const cfg = category ? CATEGORY_CONFIG[category] : null
-                            return (
-                                <div key={req.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex">
-                                    <SideThumb category={category} name={req.facilityName} />
-                                    <div className="flex-1 min-w-0 flex flex-col">
+                visibleRequests.length === 0
+                    ? <EmptyState icon={<CalendarDays className="w-10 h-10 text-slate-300" />}
+                        message="No booking requests."
+                        action={{ label: "Browse facilities", href: "/facilities" }} />
+                    : <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="overflow-x-auto">
+                            {/* Header */}
+                            <div className="flex items-stretch px-4 py-2.5 bg-slate-50 border-b border-slate-200 min-w-max">
+                                <div className="w-8 shrink-0" />
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: colWidths.facility }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Facility</span>
+                                    <ResizeHandle onMouseDown={e => startResize("facility", e.clientX, colWidths.facility)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: colWidths.location }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Location</span>
+                                    <ResizeHandle onMouseDown={e => startResize("location", e.clientX, colWidths.location)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: colWidths.status }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Status</span>
+                                    <ResizeHandle onMouseDown={e => startResize("status", e.clientX, colWidths.status)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: colWidths.created }}>
+                                    <SortHeader
+                                        label="Updated"
+                                        dir={sortDir}
+                                        onToggle={() => setSortDir(prev => prev === "desc" ? "asc" : "desc")}
+                                    />
+                                    <ResizeHandle onMouseDown={e => startResize("created", e.clientX, colWidths.created)} />
+                                </div>
+                                <div className="flex-1 min-w-[200px]">
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</span>
+                                </div>
+                            </div>
 
-                                        {/* Header */}
-                                        <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-100">
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 truncate leading-tight">{req.facilityName}</p>
-                                                {facilityMap[req.facilityId]?.location && (
-                                                    <p className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
-                                                        <MapPin className="w-3 h-3 shrink-0" />
-                                                        {facilityMap[req.facilityId].location}
-                                                    </p>
+                            {/* Rows */}
+                            {visibleRequests.map(req => {
+                                const isExpanded = expandedId === req.id
+                                return (
+                                    <div key={req.id} className="border-b border-slate-100 last:border-0">
+                                        <div className="flex items-center px-4 py-4 hover:bg-slate-50/70 transition-colors min-w-max">
+                                            <button
+                                                onClick={() => setExpandedId(isExpanded ? null : req.id)}
+                                                className="w-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer shrink-0"
+                                            >
+                                                <ChevronDown className={`w-4 h-4 transition-transform duration-150 ${isExpanded ? "rotate-180" : ""}`} />
+                                            </button>
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: colWidths.facility }}>
+                                                <p className="text-sm font-semibold text-slate-900 truncate">{req.facilityName}</p>
+                                            </div>
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: colWidths.location }}>
+                                                <p className="text-sm text-slate-600 truncate">{facilityMap[req.facilityId]?.location ?? "—"}</p>
+                                            </div>
+                                            <div className="shrink-0 pr-4 overflow-hidden flex items-center" style={{ width: colWidths.status }}>
+                                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap min-w-0 overflow-hidden ${requestStatuscolour(req.status)}`}>
+                                                    {requestStatusLabel(req.status)}
+                                                </span>
+                                            </div>
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: colWidths.created }}>
+                                                <p className="text-sm text-slate-600 truncate">{formatDateTime(req.updatedAt)}</p>
+                                            </div>
+                                            <div className="flex-1 min-w-[200px] flex items-center gap-1.5">
+                                                {req.status === "approved" && (
+                                                    <>
+                                                        <button onClick={() => setConfirmSlotTarget(req)}
+                                                            className="flex items-center gap-1 px-2.5 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition-colors cursor-pointer whitespace-nowrap">
+                                                            <CalendarDays className="w-3.5 h-3.5 shrink-0" /> Select Slot
+                                                        </button>
+                                                        <button onClick={() => handleCancelRequest(req)} disabled={cancellingRequest === req.id}
+                                                            className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap">
+                                                            <XCircle className="w-3.5 h-3.5 shrink-0" /> Cancel
+                                                        </button>
+                                                    </>
                                                 )}
-                                                {cfg && (
-                                                    <span className={`inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full text-white ${cfg.accent}`}>
-                                                        {cfg.label}
-                                                    </span>
+                                                {req.status === "alternative_suggested" && (
+                                                    <>
+                                                        <button onClick={() => handleAcceptAlternative(req)} disabled={responding === req.id}
+                                                            className="flex items-center gap-1 px-2.5 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap">
+                                                            <CheckCircle className="w-3.5 h-3.5 shrink-0" /> Accept
+                                                        </button>
+                                                        <button onClick={() => handleRejectAlternative(req)} disabled={responding === req.id}
+                                                            className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap">
+                                                            <XCircle className="w-3.5 h-3.5 shrink-0" /> Decline
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {req.status === "pending" && (
+                                                    <button onClick={() => handleCancelRequest(req)} disabled={cancellingRequest === req.id}
+                                                        className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap">
+                                                        <XCircle className="w-3.5 h-3.5 shrink-0" /> Cancel
+                                                    </button>
+                                                )}
+                                                {req.status === "rejected" && (
+                                                    <button onClick={() => handleCancelRequest(req)} disabled={cancellingRequest === req.id}
+                                                        className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-700 text-white rounded-lg text-xs font-medium hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap">
+                                                        Discard
+                                                    </button>
                                                 )}
                                             </div>
-                                            <Badge label={requestStatusLabel(req.status)} colour={requestStatuscolour(req.status)} />
                                         </div>
-
-                                        {/* Body */}
-                                        <div className="px-4 py-3 flex-1 space-y-2.5">
-                                            <div className="bg-slate-100 rounded-xl px-3 py-2.5">
-                                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
-                                                <p className="text-sm text-slate-700 leading-snug">{req.activityDescription}</p>
-                                            </div>
-
-                                            {req.status === "approved" && (
-                                                <div className="flex items-start gap-2.5 border-l-4 border-emerald-500 bg-emerald-50 rounded-r-xl px-3 py-2.5">
-                                                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                                                    <p className="text-sm text-emerald-800">
-                                                        <span className="font-semibold">Approved —</span> select a time slot to confirm your booking.
-                                                    </p>
+                                        {isExpanded && (
+                                            <div className="px-4 pb-4 bg-slate-50/60 space-y-2">
+                                                <div className="ml-8 border border-sky-200 bg-sky-50 rounded-xl px-3 py-2.5">
+                                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
+                                                    <p className="text-sm text-slate-700 leading-snug">{req.activityDescription}</p>
                                                 </div>
-                                            )}
-
-                                            {req.status === "alternative_suggested" && (
-                                                <div className="border-l-4 border-sky-500 bg-sky-50 rounded-r-xl px-3 py-2.5 space-y-1.5">
-                                                    <p className="text-xs font-bold text-sky-600 uppercase tracking-wider">Alternative Suggested</p>
-                                                    <div className="space-y-0.5">
-                                                        <p className="text-xs text-sky-800"><span className="font-semibold">Facility:</span> {req.suggestedFacilityName}</p>
-                                                        {req.reviewNote
-                                                            ? <p className="text-xs text-sky-800"><span className="font-semibold">Reason:</span> {req.reviewNote}</p>
-                                                            : <p className="text-xs text-sky-400 italic">No reason provided.</p>
-                                                        }
+                                                {req.status === "rejected" && req.reviewNote && (
+                                                    <div className="ml-8 flex items-start gap-2.5 border-l-4 border-red-400 bg-red-50 rounded-r-xl px-3 py-2.5">
+                                                        <XCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                                                        <p className="text-sm text-red-800"><span className="font-semibold">Reason:</span> {req.reviewNote}</p>
                                                     </div>
-                                                </div>
-                                            )}
-
-                                            {req.status === "rejected" && (
-                                                <div className="flex items-start gap-2.5 border-l-4 border-red-500 bg-red-50 rounded-r-xl px-3 py-2.5">
-                                                    <XCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                                                    <p className="text-sm text-red-800">
-                                                        <span className="font-semibold">Declined{req.reviewNote ? " —" : "."}</span>
-                                                        {req.reviewNote && ` ${req.reviewNote}`}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Footer */}
-                                        {req.status === "approved" && (
-                                            <div className="px-4 pb-4 pt-1 flex items-center justify-between gap-3 border-t border-slate-100">
-                                                <button onClick={() => setConfirmSlotTarget(req)}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 transition-colors cursor-pointer">
-                                                    <CalendarDays className="w-4 h-4" /> Select a Time Slot
-                                                </button>
-                                                <button onClick={() => handleCancelRequest(req)} disabled={cancellingRequest === req.id}
-                                                    className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                                                    {cancellingRequest === req.id ? "Cancelling…" : "Cancel request"}
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {req.status === "alternative_suggested" && (
-                                            <div className="px-4 pb-4 pt-1 flex gap-2 border-t border-slate-100">
-                                                <button onClick={() => handleAcceptAlternative(req)} disabled={responding === req.id}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                                                    <CheckCircle className="w-4 h-4" /> Accept
-                                                </button>
-                                                <button onClick={() => handleRejectAlternative(req)} disabled={responding === req.id}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                                                    <XCircle className="w-4 h-4" /> Decline
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {req.status === "pending" && (
-                                            <div className="px-4 pb-4 pt-1 border-t border-slate-100 flex justify-end">
-                                                <button onClick={() => handleCancelRequest(req)} disabled={cancellingRequest === req.id}
-                                                    className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                                                    {cancellingRequest === req.id ? "Cancelling…" : "Cancel request"}
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {req.status === "rejected" && (
-                                            <div className="px-4 pb-4 pt-1 border-t border-slate-100 flex justify-end">
-                                                <button onClick={() => handleCancelRequest(req)} disabled={cancellingRequest === req.id}
-                                                    className="px-4 py-2 text-sm font-medium bg-slate-900 text-white rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                                                    {cancellingRequest === req.id ? "Discarding…" : "Discard"}
-                                                </button>
+                                                )}
+                                                {req.status === "alternative_suggested" && (
+                                                    <div className="ml-8 border-l-4 border-sky-400 bg-sky-50 rounded-r-xl px-3 py-2.5 space-y-1">
+                                                        <p className="text-xs font-bold text-sky-600 uppercase tracking-wider">Alternative Suggested</p>
+                                                        <p className="text-sm text-sky-800"><span className="font-semibold">Facility:</span> {req.suggestedFacilityName}</p>
+                                                        {req.reviewNote && (
+                                                            <p className="text-sm text-sky-800"><span className="font-semibold">Reason:</span> {req.reviewNote}</p>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
-                                </div>
-                            )
-                        })
-                    }
-                </div>
+                                )
+                            })}
+                        </div>
+                    </div>
             )}
 
             {tab === "upcoming" && (
-                <div className="space-y-3">
-                    {upcomingBookings.length === 0
+                <>
+                    {/* Filter bar */}
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="relative w-48">
+                            <select
+                                value={upcomingFilterCategory}
+                                onChange={e => setUpcomingFilterCategory(e.target.value)}
+                                className="w-full appearance-none pl-3 pr-8 py-1.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+                            >
+                                <option value="">All categories</option>
+                                {upcomingCategoryOptions.map(cat => (
+                                    <option key={cat} value={cat}>{CATEGORY_CONFIG[cat]?.label ?? cat}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        </div>
+                        {upcomingFilterCategory !== "" && (
+                            <button
+                                onClick={() => setUpcomingFilterCategory("")}
+                                className="px-3 py-1.5 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </div>
+
+                    {filteredUpcoming.length === 0
                         ? <EmptyState icon={<CalendarDays className="w-10 h-10 text-slate-300" />}
-                            message="No upcoming bookings."
-                            action={{ label: "Browse facilities", href: "/facilities" }} />
-                        : upcomingBookings.map(b => {
-                            const category = facilityMap[b.facilityId]?.category
-                            const cfg = category ? CATEGORY_CONFIG[category] : null
-                            return (
-                                <div key={b.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex">
-                                    <SideThumb category={category} name={b.facilityName} />
-                                    <div className="flex-1 min-w-0 flex flex-col">
-
-                                        {/* Header */}
-                                        <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-100">
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 truncate leading-tight">{b.facilityName}</p>
-                                                {facilityMap[b.facilityId]?.location && (
-                                                    <p className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
-                                                        <MapPin className="w-3 h-3 shrink-0" />
-                                                        {facilityMap[b.facilityId].location}
-                                                    </p>
-                                                )}
-                                                {cfg && (
-                                                    <span className={`inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full text-white ${cfg.accent}`}>
-                                                        {cfg.label}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-500 text-white whitespace-nowrap shrink-0">Upcoming</span>
-                                        </div>
-
-                                        {/* Body */}
-                                        <div className="px-4 py-3 flex-1 space-y-2.5">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="flex items-center gap-1.5 bg-slate-100 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-700">
-                                                    <CalendarDays className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                                                    {formatCardDate(b.date)}
-                                                </span>
-                                                <span className="flex items-center gap-1.5 bg-slate-100 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-700">
-                                                    <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                                                    {formatSlot(b.slotStart, b.slotEnd - b.slotStart)}
-                                                </span>
-                                            </div>
-                                            <div className="bg-slate-100 rounded-xl px-3 py-2.5">
-                                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
-                                                <p className="text-sm text-slate-700 leading-snug">{b.activityDescription}</p>
-                                            </div>
-                                        </div>
-
-                                        {/* Footer */}
-                                        <div className="px-4 pb-4 pt-1 border-t border-slate-100 flex justify-end">
-                                            <button onClick={() => handleCancel(b)} disabled={cancelling === b.id}
-                                                className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                                                {cancelling === b.id ? "Cancelling…" : "Cancel Booking"}
-                                            </button>
-                                        </div>
+                            message={upcomingFilterCategory !== "" ? "No bookings match your filter." : "No upcoming bookings."}
+                            action={upcomingFilterCategory === "" ? { label: "Browse facilities", href: "/facilities" } : undefined} />
+                        : <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div className="overflow-x-auto">
+                                {/* Header */}
+                                <div className="flex items-stretch px-4 py-2.5 bg-slate-50 border-b border-slate-200 min-w-max">
+                                    <div className="w-8 shrink-0" />
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: upcomingColWidths.facility }}>
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Facility</span>
+                                        <ResizeHandle onMouseDown={e => startUpcomingResize("facility", e.clientX, upcomingColWidths.facility)} />
+                                    </div>
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: upcomingColWidths.location }}>
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Location</span>
+                                        <ResizeHandle onMouseDown={e => startUpcomingResize("location", e.clientX, upcomingColWidths.location)} />
+                                    </div>
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: upcomingColWidths.category }}>
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Category</span>
+                                        <ResizeHandle onMouseDown={e => startUpcomingResize("category", e.clientX, upcomingColWidths.category)} />
+                                    </div>
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: upcomingColWidths.date }}>
+                                        <SortHeader
+                                            label="Date"
+                                            dir={upcomingSortDir}
+                                            onToggle={() => setUpcomingSortDir(prev => prev === "asc" ? "desc" : "asc")}
+                                        />
+                                        <ResizeHandle onMouseDown={e => startUpcomingResize("date", e.clientX, upcomingColWidths.date)} />
+                                    </div>
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: upcomingColWidths.time }}>
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Time</span>
+                                        <ResizeHandle onMouseDown={e => startUpcomingResize("time", e.clientX, upcomingColWidths.time)} />
+                                    </div>
+                                    <div className="flex-1 min-w-30">
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</span>
                                     </div>
                                 </div>
-                            )
-                        })
+
+                                {/* Rows */}
+                                {filteredUpcoming.map(b => {
+                                    const category = facilityMap[b.facilityId]?.category
+                                    const cfg = category ? CATEGORY_CONFIG[category] : null
+                                    const isExpanded = expandedUpcomingId === b.id
+                                    return (
+                                        <div key={b.id} className="border-b border-slate-100 last:border-0">
+                                            <div className="flex items-center px-4 py-4 hover:bg-slate-50/70 transition-colors min-w-max">
+                                                <button
+                                                    onClick={() => setExpandedUpcomingId(isExpanded ? null : b.id)}
+                                                    className="w-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer shrink-0"
+                                                >
+                                                    <ChevronDown className={`w-4 h-4 transition-transform duration-150 ${isExpanded ? "rotate-180" : ""}`} />
+                                                </button>
+                                                <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: upcomingColWidths.facility }}>
+                                                    <p className="text-sm font-semibold text-slate-900 truncate">{b.facilityName}</p>
+                                                </div>
+                                                <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: upcomingColWidths.location }}>
+                                                    <p className="text-sm text-slate-600 truncate">{facilityMap[b.facilityId]?.location ?? "—"}</p>
+                                                </div>
+                                                <div className="shrink-0 pr-4 overflow-hidden flex items-center" style={{ width: upcomingColWidths.category }}>
+                                                    {cfg
+                                                        ? <span className={`text-xs font-semibold px-2.5 py-1 rounded-full text-white whitespace-nowrap min-w-0 overflow-hidden ${cfg.accent}`}>{cfg.label}</span>
+                                                        : <span className="text-xs text-slate-400">—</span>
+                                                    }
+                                                </div>
+                                                <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: upcomingColWidths.date }}>
+                                                    <p className="text-sm text-slate-600 truncate">{formatCardDate(b.date)}</p>
+                                                </div>
+                                                <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: upcomingColWidths.time }}>
+                                                    <p className="text-sm text-slate-600 truncate">{formatSlot(b.slotStart, b.slotEnd - b.slotStart)}</p>
+                                                </div>
+                                                <div className="flex-1 min-w-30 flex items-center">
+                                                    <button onClick={() => handleCancel(b)} disabled={cancelling === b.id}
+                                                        className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap">
+                                                        <XCircle className="w-3.5 h-3.5 shrink-0" />
+                                                        {cancelling === b.id ? "Cancelling…" : "Cancel"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {isExpanded && (
+                                                <div className="px-4 pb-4 bg-slate-50/60">
+                                                    <div className="ml-8 border border-sky-200 bg-sky-50 rounded-xl px-3 py-2.5">
+                                                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
+                                                        <p className="text-sm text-slate-700 leading-snug">{b.activityDescription}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
                     }
-                </div>
+                </>
             )}
 
             {tab === "history" && (
-                <div className="space-y-3">
-                    {historyBookings.length === 0
+                <>
+                    {/* Filter bar */}
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="relative w-48">
+                            <select
+                                value={historyFilterCategory}
+                                onChange={e => setHistoryFilterCategory(e.target.value)}
+                                className="w-full appearance-none pl-3 pr-8 py-1.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+                            >
+                                <option value="">All categories</option>
+                                {historyCategoryOptions.map(cat => (
+                                    <option key={cat} value={cat}>{CATEGORY_CONFIG[cat]?.label ?? cat}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        </div>
+                        <div className="relative w-40">
+                            <select
+                                value={historyFilterStatus}
+                                onChange={e => setHistoryFilterStatus(e.target.value)}
+                                className="w-full appearance-none pl-3 pr-8 py-1.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+                            >
+                                <option value="">All statuses</option>
+                                {historyStatusOptions.map(s => (
+                                    <option key={s} value={s}>{bookingStatusLabel(s as "completed" | "cancelled" | "upcoming")}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        </div>
+                        {(historyFilterCategory !== "" || historyFilterStatus !== "") && (
+                            <button
+                                onClick={() => { setHistoryFilterCategory(""); setHistoryFilterStatus("") }}
+                                className="px-3 py-1.5 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </div>
+
+                    {filteredHistory.length === 0
                         ? <EmptyState icon={<CalendarDays className="w-10 h-10 text-slate-300" />}
-                            message="No booking history yet." />
-                        : historyBookings.map(b => {
-                            const category = facilityMap[b.facilityId]?.category
-                            const cfg = category ? CATEGORY_CONFIG[category] : null
-                            return (
-                                <div key={b.id} className={`bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex ${b.status === "cancelled" ? "opacity-60" : ""}`}>
-                                    <SideThumb category={category} name={b.facilityName} />
-                                    <div className="flex-1 min-w-0 flex flex-col">
-
-                                        {/* Header */}
-                                        <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-100">
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 truncate leading-tight">{b.facilityName}</p>
-                                                {facilityMap[b.facilityId]?.location && (
-                                                    <p className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
-                                                        <MapPin className="w-3 h-3 shrink-0" />
-                                                        {facilityMap[b.facilityId].location}
-                                                    </p>
-                                                )}
-                                                {cfg && (
-                                                    <span className={`inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full text-white ${cfg.accent}`}>
-                                                        {cfg.label}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <Badge label={bookingStatusLabel(b.status)} colour={bookingStatusColour(b.status)} />
-                                        </div>
-
-                                        {/* Body */}
-                                        <div className="px-4 py-3 space-y-2.5">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="flex items-center gap-1.5 bg-slate-100 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-700">
-                                                    <CalendarDays className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                                                    {formatCardDate(b.date)}
-                                                </span>
-                                                <span className="flex items-center gap-1.5 bg-slate-100 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-700">
-                                                    <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                                                    {formatSlot(b.slotStart, b.slotEnd - b.slotStart)}
-                                                </span>
-                                            </div>
-                                            <div className="bg-slate-100 rounded-xl px-3 py-2.5">
-                                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
-                                                <p className="text-sm text-slate-700 leading-snug">{b.activityDescription}</p>
-                                            </div>
-                                        </div>
+                            message={historyFilterCategory !== "" || historyFilterStatus !== "" ? "No bookings match your filters." : "No booking history yet."} />
+                        : <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div className="overflow-x-auto">
+                                {/* Header */}
+                                <div className="flex items-stretch px-4 py-2.5 bg-slate-50 border-b border-slate-200 min-w-max">
+                                    <div className="w-8 shrink-0" />
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: historyColWidths.facility }}>
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Facility</span>
+                                        <ResizeHandle onMouseDown={e => startHistoryResize("facility", e.clientX, historyColWidths.facility)} />
+                                    </div>
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: historyColWidths.location }}>
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Location</span>
+                                        <ResizeHandle onMouseDown={e => startHistoryResize("location", e.clientX, historyColWidths.location)} />
+                                    </div>
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: historyColWidths.category }}>
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Category</span>
+                                        <ResizeHandle onMouseDown={e => startHistoryResize("category", e.clientX, historyColWidths.category)} />
+                                    </div>
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: historyColWidths.date }}>
+                                        <SortHeader
+                                            label="Date"
+                                            dir={historySortDir}
+                                            onToggle={() => setHistorySortDir(prev => prev === "desc" ? "asc" : "desc")}
+                                        />
+                                        <ResizeHandle onMouseDown={e => startHistoryResize("date", e.clientX, historyColWidths.date)} />
+                                    </div>
+                                    <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: historyColWidths.time }}>
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Time</span>
+                                        <ResizeHandle onMouseDown={e => startHistoryResize("time", e.clientX, historyColWidths.time)} />
+                                    </div>
+                                    <div className="flex-1 min-w-32">
+                                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</span>
                                     </div>
                                 </div>
-                            )
-                        })
+
+                                {/* Rows */}
+                                {filteredHistory.map(b => {
+                                    const category = facilityMap[b.facilityId]?.category
+                                    const cfg = category ? CATEGORY_CONFIG[category] : null
+                                    const isExpanded = expandedHistoryId === b.id
+                                    return (
+                                        <div key={b.id} className="border-b border-slate-100 last:border-0">
+                                            <div className="flex items-center px-4 py-4 hover:bg-slate-50/70 transition-colors min-w-max">
+                                                <button
+                                                    onClick={() => setExpandedHistoryId(isExpanded ? null : b.id)}
+                                                    className="w-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer shrink-0"
+                                                >
+                                                    <ChevronDown className={`w-4 h-4 transition-transform duration-150 ${isExpanded ? "rotate-180" : ""}`} />
+                                                </button>
+                                                <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: historyColWidths.facility }}>
+                                                    <p className="text-sm font-semibold text-slate-900 truncate">{b.facilityName}</p>
+                                                </div>
+                                                <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: historyColWidths.location }}>
+                                                    <p className="text-sm text-slate-600 truncate">{facilityMap[b.facilityId]?.location ?? "—"}</p>
+                                                </div>
+                                                <div className="shrink-0 pr-4 overflow-hidden flex items-center" style={{ width: historyColWidths.category }}>
+                                                    {cfg
+                                                        ? <span className={`text-xs font-semibold px-2.5 py-1 rounded-full text-white whitespace-nowrap min-w-0 overflow-hidden ${cfg.accent}`}>{cfg.label}</span>
+                                                        : <span className="text-xs text-slate-400">—</span>
+                                                    }
+                                                </div>
+                                                <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: historyColWidths.date }}>
+                                                    <p className="text-sm text-slate-600 truncate">{formatCardDate(b.date)}</p>
+                                                </div>
+                                                <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: historyColWidths.time }}>
+                                                    <p className="text-sm text-slate-600 truncate">{formatSlot(b.slotStart, b.slotEnd - b.slotStart)}</p>
+                                                </div>
+                                                <div className="flex-1 min-w-32 flex items-center">
+                                                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap min-w-0 overflow-hidden ${bookingStatusColour(b.status)}`}>
+                                                        {bookingStatusLabel(b.status)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {isExpanded && (
+                                                <div className="px-4 pb-4 bg-slate-50/60">
+                                                    <div className="ml-8 border border-sky-200 bg-sky-50 rounded-xl px-3 py-2.5">
+                                                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
+                                                        <p className="text-sm text-slate-700 leading-snug">{b.activityDescription}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
                     }
-                </div>
+                </>
             )}
 
             {confirmSlotTarget && (
@@ -849,6 +1021,54 @@ function MemberBookingsTab() {
             )}
         </>
     )
+}
+
+// ── Staff table helpers ────────────────────────────────────────────────────
+
+type SortDir = "asc" | "desc"
+
+function SortHeader({ label, dir, onToggle }: {
+    label: string
+    dir: SortDir
+    onToggle: () => void
+}) {
+    const Icon = dir === "asc" ? ArrowUp : ArrowDown
+    return (
+        <button
+            onClick={onToggle}
+            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-sky-600 hover:text-sky-700 transition-colors cursor-pointer min-w-0 overflow-hidden"
+        >
+            <span className="truncate min-w-0">{label}</span>
+            <Icon className="w-3 h-3 shrink-0" />
+        </button>
+    )
+}
+
+function ResizeHandle({ onMouseDown }: { onMouseDown: (e: React.MouseEvent) => void }) {
+    return (
+        <div
+            onMouseDown={e => { e.preventDefault(); onMouseDown(e) }}
+            className="absolute right-0 top-1 bottom-1 w-3 flex items-center justify-center cursor-col-resize z-10 group/rh"
+        >
+            <div className="w-0.5 h-full rounded-full bg-slate-300 group-hover/rh:bg-sky-500 group-hover/rh:w-1 transition-all duration-100" />
+        </div>
+    )
+}
+
+function makeResizer<T extends Record<string, number>>(
+    setWidths: React.Dispatch<React.SetStateAction<T>>,
+) {
+    return (col: keyof T & string, startX: number, startWidth: number) => {
+        function onMove(e: MouseEvent) {
+            setWidths(prev => ({ ...prev, [col]: Math.max(80, startWidth + e.clientX - startX) }))
+        }
+        function onUp() {
+            document.removeEventListener("mousemove", onMove)
+            document.removeEventListener("mouseup", onUp)
+        }
+        document.addEventListener("mousemove", onMove)
+        document.addEventListener("mouseup", onUp)
+    }
 }
 
 // ── Staff bookings tab ─────────────────────────────────────────────────────
@@ -864,6 +1084,17 @@ function StaffBookingsTab() {
     const [rejectTarget, setRejectTarget]   = useState<BookingRequest | null>(null)
     const [altTarget, setAltTarget]         = useState<BookingRequest | null>(null)
     const [processing, setProcessing]       = useState<string | null>(null)
+    const [expandedId, setExpandedId]       = useState<string | null>(null)
+    const [reqFilterFacility,  setReqFilterFacility]  = useState("")
+    const [reqFilterMember,   setReqFilterMember]    = useState("")
+    const [sessFilterFacility, setSessFilterFacility] = useState("")
+    const [sessFilterMember,  setSessFilterMember]   = useState("")
+    const [sortDir, setSortDir]               = useState<SortDir>("desc")
+    const [reqColWidths, setReqColWidths]   = useState({ facility: 176, location: 144, availability: 132, created: 148, member: 176 })
+    const [sessColWidths, setSessColWidths] = useState({ facility: 176, location: 144, date: 112, time: 148, member: 176 })
+
+    const startReqResize  = makeResizer<typeof reqColWidths>(setReqColWidths)
+    const startSessResize = makeResizer<typeof sessColWidths>(setSessColWidths)
 
     async function load() {
         if (!user) return
@@ -923,181 +1154,290 @@ function StaffBookingsTab() {
     const pending  = requests.filter(r => r.status === "pending")
     const sessions = bookings.filter(b => b.status === "upcoming")
 
+    const hasReqFilters  = reqFilterFacility  !== "" || reqFilterMember  !== ""
+    const hasSessFilters = sessFilterFacility !== "" || sessFilterMember !== ""
+
+    const reqFacilityOptions  = [...new Set(pending.map(r => r.facilityName))].sort()
+    const sessFacilityOptions = [...new Set(sessions.map(b => b.facilityName))].sort()
+
+    const filteredPending = pending
+        .filter(r => reqFilterFacility === "" || r.facilityName === reqFilterFacility)
+        .filter(r => (r.memberEmail ?? "").toLowerCase().includes(reqFilterMember.toLowerCase()))
+        .sort((a, b) => sortDir === "desc"
+            ? b.createdAt.localeCompare(a.createdAt)
+            : a.createdAt.localeCompare(b.createdAt))
+
+    const filteredSessions = sessions
+        .filter(b => sessFilterFacility === "" || b.facilityName === sessFilterFacility)
+        .filter(b => (b.memberEmail ?? "").toLowerCase().includes(sessFilterMember.toLowerCase()))
+        .sort((a, b) => {
+            const ka = a.date + String(a.slotStart).padStart(5, "0")
+            const kb = b.date + String(b.slotStart).padStart(5, "0")
+            return sortDir === "asc" ? ka.localeCompare(kb) : kb.localeCompare(ka)
+        })
+
     const tabs = [
         { id: "pending",  label: "Pending",  count: pending.length },
         { id: "sessions", label: "Sessions", count: sessions.length },
     ]
 
+    const isPending             = tab === "pending"
+    const activeFilterFacility  = isPending ? reqFilterFacility    : sessFilterFacility
+    const setActiveFilterFacility = isPending ? setReqFilterFacility : setSessFilterFacility
+    const activeFilterMember    = isPending ? reqFilterMember      : sessFilterMember
+    const setActiveFilterMember = isPending ? setReqFilterMember   : setSessFilterMember
+    const hasActiveFilters      = isPending ? hasReqFilters        : hasSessFilters
+    const activeFacilityOptions = isPending ? reqFacilityOptions   : sessFacilityOptions
+
     if (loading) return <LoadingSkeleton />
 
     return (
         <>
-            <Tabs tabs={tabs} active={tab} onChange={setTab} />
+            <Tabs tabs={tabs} active={tab} onChange={id => {
+                setTab(id)
+                setExpandedId(null)
+                setSortDir(id === "sessions" ? "asc" : "desc")
+            }} />
+
+            {/* Filter bar */}
+            <div className="flex items-center gap-2 mb-4">
+                <div className="relative w-48">
+                    <select
+                        value={activeFilterFacility}
+                        onChange={e => setActiveFilterFacility(e.target.value)}
+                        className="w-full appearance-none pl-3 pr-8 py-1.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+                    >
+                        <option value="">All facilities</option>
+                        {activeFacilityOptions.map(name => (
+                            <option key={name} value={name}>{name}</option>
+                        ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                </div>
+                <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    <input
+                        type="text"
+                        placeholder="Filter by member…"
+                        value={activeFilterMember}
+                        onChange={e => setActiveFilterMember(e.target.value)}
+                        className="pl-8 pr-3 py-1.5 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 w-48"
+                    />
+                </div>
+                {hasActiveFilters && (
+                    <button
+                        onClick={() => { setActiveFilterFacility(""); setActiveFilterMember("") }}
+                        className="px-3 py-1.5 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                    >
+                        Clear
+                    </button>
+                )}
+            </div>
 
             {tab === "pending" && (
-                <div className="space-y-3">
-                    {pending.length === 0
-                        ? <EmptyState icon={<CheckCircle2 className="w-10 h-10 text-slate-300" />}
-                            message="No pending requests." />
-                        : pending.map(req => {
-                            const category = facilityMap[req.facilityId]?.category
-                            const cfg = category ? CATEGORY_CONFIG[category] : null
-                            const avail = facilityAvailability[req.facilityId]
-                            const { label: availLabel, colour: availColour } = avail
-                                ? availabilityCategory(avail.booked, avail.total)
-                                : { label: "", colour: "" }
-                            const hasAlternatives = allFacilities.some(
-                                f => f.category === category && f.isActive && f.id !== req.facilityId,
-                            )
-                            return (
-                                <div key={req.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex">
-                                    <SideThumb category={category} name={req.facilityName} />
-                                    <div className="flex-1 min-w-0 flex flex-col">
-
-                                        {/* Header */}
-                                        <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-100">
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 truncate leading-tight">{req.facilityName}</p>
-                                                {facilityMap[req.facilityId]?.location && (
-                                                    <p className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
-                                                        <MapPin className="w-3 h-3 shrink-0" />
-                                                        {facilityMap[req.facilityId].location}
-                                                    </p>
-                                                )}
-                                                {cfg && (
-                                                    <span className={`inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full text-white ${cfg.accent}`}>
-                                                        {cfg.label}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <Badge label="Pending" colour="bg-amber-500 text-white" />
-                                        </div>
-
-                                        {/* Body */}
-                                        <div className="px-4 py-3 flex-1 space-y-2.5">
-                                            <div className="flex items-center gap-2.5">
-                                                <MemberAvatar name={req.memberName} />
-                                                <div>
-                                                    <p className="text-xs font-medium text-slate-400 leading-tight">Requested by</p>
-                                                    <p className="text-sm font-semibold text-slate-800 leading-tight">{req.memberName}</p>
-                                                </div>
-                                            </div>
-                                            <div className="bg-slate-100 rounded-xl px-3 py-2.5">
-                                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
-                                                <p className="text-sm text-slate-700 leading-snug">{req.activityDescription}</p>
-                                            </div>
-                                            {avail && (
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${availColour}`}>
-                                                        {availLabel} availability
-                                                    </span>
-                                                    <p className="text-xs text-slate-400">
-                                                        {avail.total - avail.booked}/{avail.total} slots free · next 7 days
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Footer */}
-                                        <div className="px-4 pb-4 pt-1 border-t border-slate-100 flex gap-2">
-                                            <button onClick={() => handleApprove(req)} disabled={processing === req.id}
-                                                className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                                                <CheckCircle className="w-4 h-4" /> Approve
-                                            </button>
-                                            <button onClick={() => setRejectTarget(req)}
-                                                className="flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors cursor-pointer">
-                                                <XCircle className="w-4 h-4" /> Decline
-                                            </button>
-                                            <button onClick={() => setAltTarget(req)}
-                                                disabled={!hasAlternatives}
-                                                title={!hasAlternatives ? "No alternative facilities available" : undefined}
-                                                className="flex items-center gap-1.5 px-4 py-2 bg-slate-700 text-white rounded-xl text-sm font-medium hover:enabled:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                                                <Repeat className="w-4 h-4" /> Suggest Alt
-                                            </button>
-                                        </div>
-                                    </div>
+                filteredPending.length === 0
+                    ? <EmptyState
+                        icon={<CheckCircle2 className="w-10 h-10 text-slate-300" />}
+                        message={hasReqFilters ? "No requests match your filters." : "No pending requests."}
+                    />
+                    : <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="overflow-x-auto">
+                            {/* Header */}
+                            <div className="flex items-stretch px-4 py-2.5 bg-slate-50 border-b border-slate-200 min-w-max">
+                                <div className="w-8 shrink-0" />
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: reqColWidths.facility }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Facility</span>
+                                    <ResizeHandle onMouseDown={e => startReqResize("facility", e.clientX, reqColWidths.facility)} />
                                 </div>
-                            )
-                        })
-                    }
-                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: reqColWidths.location }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Location</span>
+                                    <ResizeHandle onMouseDown={e => startReqResize("location", e.clientX, reqColWidths.location)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: reqColWidths.availability }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Availability</span>
+                                    <ResizeHandle onMouseDown={e => startReqResize("availability", e.clientX, reqColWidths.availability)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: reqColWidths.created }}>
+                                    <SortHeader
+                                        label="Created"
+                                        dir={sortDir}
+                                        onToggle={() => setSortDir(prev => prev === "desc" ? "asc" : "desc")}
+                                    />
+                                    <ResizeHandle onMouseDown={e => startReqResize("created", e.clientX, reqColWidths.created)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: reqColWidths.member }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Requested By</span>
+                                    <ResizeHandle onMouseDown={e => startReqResize("member", e.clientX, reqColWidths.member)} />
+                                </div>
+                                <div className="flex-1 min-w-[200px]">
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</span>
+                                </div>
+                            </div>
+
+                            {/* Rows */}
+                            {filteredPending.map(req => {
+                                const category = facilityMap[req.facilityId]?.category
+                                const avail = facilityAvailability[req.facilityId]
+                                const { label: availLabel, colour: availColour } = avail
+                                    ? availabilityCategory(avail.booked, avail.total)
+                                    : { label: "", colour: "" }
+                                const hasAlternatives = allFacilities.some(
+                                    f => f.category === category && f.isActive && f.id !== req.facilityId,
+                                )
+                                const isExpanded = expandedId === req.id
+                                return (
+                                    <div key={req.id} className="border-b border-slate-100 last:border-0">
+                                        <div className="flex items-center px-4 py-4 hover:bg-slate-50/70 transition-colors min-w-max">
+                                            <button
+                                                onClick={() => setExpandedId(isExpanded ? null : req.id)}
+                                                className="w-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer shrink-0"
+                                            >
+                                                <ChevronDown className={`w-4 h-4 transition-transform duration-150 ${isExpanded ? "rotate-180" : ""}`} />
+                                            </button>
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: reqColWidths.facility }}>
+                                                <p className="text-sm font-semibold text-slate-900 truncate">{req.facilityName}</p>
+                                            </div>
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: reqColWidths.location }}>
+                                                <p className="text-sm text-slate-600 truncate">{facilityMap[req.facilityId]?.location ?? "—"}</p>
+                                            </div>
+                                            <div className="shrink-0 pr-4 overflow-hidden flex items-center" style={{ width: reqColWidths.availability }}>
+                                                {avail
+                                                    ? <span className={`text-xs px-2 py-0.5 rounded-full font-semibold whitespace-nowrap min-w-0 overflow-hidden ${availColour}`}>{availLabel} availability</span>
+                                                    : <span className="text-xs text-slate-400">—</span>
+                                                }
+                                            </div>
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: reqColWidths.created }}>
+                                                <p className="text-sm text-slate-600 truncate">{formatDateTime(req.createdAt)}</p>
+                                            </div>
+                                            <div className="shrink-0 pr-4 flex items-center gap-2 min-w-0 overflow-hidden" style={{ width: reqColWidths.member }}>
+                                                <MemberAvatar name={req.memberName} />
+                                                <p className="text-sm text-slate-700 truncate">{req.memberEmail ?? req.memberName}</p>
+                                            </div>
+                                            <div className="flex-1 min-w-[200px] flex items-center gap-1.5">
+                                                <button onClick={() => handleApprove(req)} disabled={processing === req.id}
+                                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap">
+                                                    <CheckCircle className="w-3.5 h-3.5 shrink-0" /> Approve
+                                                </button>
+                                                <button onClick={() => setRejectTarget(req)}
+                                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 transition-colors cursor-pointer whitespace-nowrap">
+                                                    <XCircle className="w-3.5 h-3.5 shrink-0" /> Decline
+                                                </button>
+                                                <button onClick={() => setAltTarget(req)}
+                                                    disabled={!hasAlternatives}
+                                                    title={!hasAlternatives ? "No alternative facilities available" : undefined}
+                                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-700 text-white rounded-lg text-xs font-medium hover:enabled:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap">
+                                                    <Repeat className="w-3.5 h-3.5 shrink-0" /> Suggest Alt
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {isExpanded && (
+                                            <div className="px-4 pb-4 bg-slate-50/60">
+                                                <div className="ml-8 border border-sky-200 bg-sky-50 rounded-xl px-3 py-2.5">
+                                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
+                                                    <p className="text-sm text-slate-700 leading-snug">{req.activityDescription}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
             )}
 
             {tab === "sessions" && (
-                <div className="space-y-3">
-                    {sessions.length === 0
-                        ? <EmptyState icon={<CalendarDays className="w-10 h-10 text-slate-300" />}
-                            message="No upcoming sessions." />
-                        : sessions.map(b => {
-                            const category = facilityMap[b.facilityId]?.category
-                            const cfg = category ? CATEGORY_CONFIG[category] : null
-                            const today    = new Date().toISOString().split("T")[0]
-                            const nowMins  = new Date().getHours() * 60 + new Date().getMinutes()
-                            const canComplete = b.date < today || (b.date === today && nowMins >= b.slotStart)
-                            return (
-                                <div key={b.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex">
-                                    <SideThumb category={category} name={b.facilityName} />
-                                    <div className="flex-1 min-w-0 flex flex-col">
+                filteredSessions.length === 0
+                    ? <EmptyState
+                        icon={<CalendarDays className="w-10 h-10 text-slate-300" />}
+                        message={hasSessFilters ? "No sessions match your filters." : "No upcoming sessions."}
+                    />
+                    : <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="overflow-x-auto">
+                            {/* Header */}
+                            <div className="flex items-stretch px-4 py-2.5 bg-slate-50 border-b border-slate-200 min-w-max">
+                                <div className="w-8 shrink-0" />
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: sessColWidths.facility }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Facility</span>
+                                    <ResizeHandle onMouseDown={e => startSessResize("facility", e.clientX, sessColWidths.facility)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: sessColWidths.location }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Location</span>
+                                    <ResizeHandle onMouseDown={e => startSessResize("location", e.clientX, sessColWidths.location)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: sessColWidths.date }}>
+                                    <SortHeader
+                                        label="Date"
+                                        dir={sortDir}
+                                        onToggle={() => setSortDir(prev => prev === "asc" ? "desc" : "asc")}
+                                    />
+                                    <ResizeHandle onMouseDown={e => startSessResize("date", e.clientX, sessColWidths.date)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: sessColWidths.time }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Time</span>
+                                    <ResizeHandle onMouseDown={e => startSessResize("time", e.clientX, sessColWidths.time)} />
+                                </div>
+                                <div className="relative shrink-0 pr-4 flex items-center overflow-hidden" style={{ width: sessColWidths.member }}>
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-0 truncate">Member</span>
+                                    <ResizeHandle onMouseDown={e => startSessResize("member", e.clientX, sessColWidths.member)} />
+                                </div>
+                                <div className="flex-1 min-w-[160px]">
+                                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</span>
+                                </div>
+                            </div>
 
-                                        {/* Header */}
-                                        <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-100">
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 truncate leading-tight">{b.facilityName}</p>
-                                                {facilityMap[b.facilityId]?.location && (
-                                                    <p className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
-                                                        <MapPin className="w-3 h-3 shrink-0" />
-                                                        {facilityMap[b.facilityId].location}
-                                                    </p>
-                                                )}
-                                                {cfg && (
-                                                    <span className={`inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full text-white ${cfg.accent}`}>
-                                                        {cfg.label}
-                                                    </span>
-                                                )}
+                            {/* Rows */}
+                            {filteredSessions.map(b => {
+                                const today   = new Date().toISOString().split("T")[0]
+                                const nowMins = new Date().getHours() * 60 + new Date().getMinutes()
+                                const canComplete = b.date < today || (b.date === today && nowMins >= b.slotStart)
+                                const isExpanded  = expandedId === b.id
+                                return (
+                                    <div key={b.id} className="border-b border-slate-100 last:border-0">
+                                        <div className="flex items-center px-4 py-4 hover:bg-slate-50/70 transition-colors min-w-max">
+                                            <button
+                                                onClick={() => setExpandedId(isExpanded ? null : b.id)}
+                                                className="w-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer shrink-0"
+                                            >
+                                                <ChevronDown className={`w-4 h-4 transition-transform duration-150 ${isExpanded ? "rotate-180" : ""}`} />
+                                            </button>
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: sessColWidths.facility }}>
+                                                <p className="text-sm font-semibold text-slate-900 truncate">{b.facilityName}</p>
                                             </div>
-                                            <Badge label="Upcoming" colour="bg-sky-500 text-white" />
-                                        </div>
-
-                                        {/* Body */}
-                                        <div className="px-4 py-3 flex-1 space-y-2.5">
-                                            <div className="flex items-center gap-2.5">
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: sessColWidths.location }}>
+                                                <p className="text-sm text-slate-600 truncate">{facilityMap[b.facilityId]?.location ?? "—"}</p>
+                                            </div>
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: sessColWidths.date }}>
+                                                <p className="text-sm text-slate-700 truncate">{formatCardDate(b.date)}</p>
+                                            </div>
+                                            <div className="shrink-0 pr-4 min-w-0 overflow-hidden" style={{ width: sessColWidths.time }}>
+                                                <p className="text-sm text-slate-700 truncate">{formatSlot(b.slotStart, b.slotEnd - b.slotStart)}</p>
+                                            </div>
+                                            <div className="shrink-0 pr-4 flex items-center gap-2 min-w-0 overflow-hidden" style={{ width: sessColWidths.member }}>
                                                 <MemberAvatar name={b.memberName} />
-                                                <div>
-                                                    <p className="text-xs font-medium text-slate-400 leading-tight">Member</p>
-                                                    <p className="text-sm font-semibold text-slate-800 leading-tight">{b.memberName}</p>
+                                                <p className="text-sm text-slate-700 truncate">{b.memberEmail ?? b.memberName}</p>
+                                            </div>
+                                            <div className="flex-1 min-w-[160px]">
+                                                <button onClick={() => handleMarkComplete(b)}
+                                                    disabled={processing === b.id || !canComplete}
+                                                    title={!canComplete ? "Session has not started yet" : undefined}
+                                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:enabled:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer whitespace-nowrap">
+                                                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Mark Complete
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {isExpanded && (
+                                            <div className="px-4 pb-4 bg-slate-50/60">
+                                                <div className="ml-8 border border-sky-200 bg-sky-50 rounded-xl px-3 py-2.5">
+                                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
+                                                    <p className="text-sm text-slate-700 leading-snug">{b.activityDescription}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="flex items-center gap-1.5 bg-slate-100 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-700">
-                                                    <CalendarDays className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                                                    {formatCardDate(b.date)}
-                                                </span>
-                                                <span className="flex items-center gap-1.5 bg-slate-100 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-700">
-                                                    <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                                                    {formatSlot(b.slotStart, b.slotEnd - b.slotStart)}
-                                                </span>
-                                            </div>
-                                            <div className="bg-slate-100 rounded-xl px-3 py-2.5">
-                                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Intended Activity</p>
-                                                <p className="text-sm text-slate-700 leading-snug">{b.activityDescription}</p>
-                                            </div>
-                                        </div>
-
-                                        {/* Footer */}
-                                        <div className="px-4 pb-4 pt-1 border-t border-slate-100">
-                                            <button onClick={() => handleMarkComplete(b)}
-                                                disabled={processing === b.id || !canComplete}
-                                                title={!canComplete ? "Session has not started yet" : undefined}
-                                                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-                                                <CheckCircle2 className="w-4 h-4" /> Mark Complete
-                                            </button>
-                                        </div>
+                                        )}
                                     </div>
-                                </div>
-                            )
-                        })
-                    }
-                </div>
+                                )
+                            })}
+                        </div>
+                    </div>
             )}
 
             {rejectTarget && (

@@ -10,6 +10,7 @@ import { formatDate, formatSlot } from "@/lib/utils"
 export async function createBookingRequest(data: {
     memberId: string
     memberName: string
+    memberEmail: string
     facilityId: string
     facilityName: string
     activityDescription: string
@@ -119,6 +120,7 @@ export async function confirmBookingSlot(
     const bookingRef = await addDoc(collection(db, "bookings"), {
         memberId: request.memberId,
         memberName: request.memberName,
+        memberEmail: request.memberEmail,
         facilityId: request.facilityId,
         facilityName: request.facilityName,
         date,
