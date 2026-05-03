@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/providers/AuthProvider";
 import { loginFormSchema, LoginForm } from "../../features/auth/schemas/loginFormSchema";
 import { inputClass, FieldError } from "./formHelpers";
 import { loginFirebaseError, googleSignInFirebaseError } from "../../features/auth/utils/mapFirebaseErrors";

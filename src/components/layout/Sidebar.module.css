@@ -1,5 +1,0 @@
-.sidebar {
-    width: clamp(150px, 15vw, 280px);
-    height: 100vh;
-    background-color: #d1d1d1;
-}
