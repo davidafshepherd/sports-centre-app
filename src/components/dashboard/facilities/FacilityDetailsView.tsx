@@ -143,6 +143,7 @@ function BookingRequestForm({ facility, onDone }: { facility: Facility; onDone: 
             await createBookingRequest({
                 memberId:            user.uid,
                 memberName:          `${userProfile.firstName} ${userProfile.lastName}`,
+                memberEmail:         user.email ?? "",
                 facilityId:          facility.id,
                 facilityName:        facility.name,
                 activityDescription: data.activityDescription,

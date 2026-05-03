@@ -14,6 +14,7 @@ export interface BookingRequest {
     id: string
     memberId: string
     memberName: string
+    memberEmail: string
     facilityId: string
     facilityName: string
     activityDescription: string
@@ -32,6 +33,7 @@ export interface Booking {
     id: string
     memberId: string
     memberName: string
+    memberEmail: string
     facilityId: string
     facilityName: string
     date: string
