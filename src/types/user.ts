@@ -1,5 +1,5 @@
-export type UserRole = "member" | "staff" | "admin";
-export type MembershipStatus = "active" | "suspended" | "cancelled";
+export type UserRole = 'member' | 'staff' | 'admin';
+export type MembershipStatus = 'active' | 'suspended' | 'cancelled';
 
 export interface Address {
     line1: string;
@@ -14,9 +14,9 @@ export interface UserProfile {
     firstName: string;
     lastName: string;
     email: string;
-    dateOfBirth: string; // ISO date string (YYYY-MM-DD)
+    dateOfBirth: string;    // ISO date string (YYYY-MM-DD)
     address: Address;
     role: UserRole;
     membershipStatus: MembershipStatus;
-    createdAt: string; // ISO date string (YYYY-MM-DD)
+    createdAt: string;      // ISO date string (YYYY-MM-DD)
 }
