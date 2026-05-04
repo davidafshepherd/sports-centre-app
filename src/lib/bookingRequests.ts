@@ -7,13 +7,13 @@ import {
     deleteDoc, 
     query, 
     where,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 
-import { getFacilitiesForStaff, getFacilityById } from "@/lib/facilities";
-import { db } from "@/lib/firebase";
-import { createNotification } from "@/lib/notifications";
-import { formatDate, formatSlot } from "@/lib/utils/dateFormatters";
-import type { BookingRequest } from "@/types/bookingRequest";
+import { getFacilitiesForStaff, getFacilityById } from '@/lib/facilities';
+import { db } from '@/lib/firebase';
+import { createNotification } from '@/lib/notifications';
+import { formatDate, formatSlot } from '@/lib/utils/date';
+import type { BookingRequest } from '@/types/bookingRequest';
 
 /**
  * Creates a new booking request.

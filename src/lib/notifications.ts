@@ -7,10 +7,10 @@ import {
     deleteDoc, 
     query, 
     where,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 
-import { db } from "@/lib/firebase";
-import type { Notification } from "@/types/notification";
+import { db } from '@/lib/firebase';
+import type { Notification } from '@/types/notification';
 
 /**
  * Creates a notification for a user.

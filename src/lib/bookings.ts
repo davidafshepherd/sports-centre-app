@@ -5,13 +5,13 @@ import {
     updateDoc, 
     query, 
     where,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 
-import { getFacilitiesForStaff } from "@/lib/facilities";
-import { db } from "@/lib/firebase";
-import { createNotification } from "@/lib/notifications";
-import { formatDate } from "@/lib/utils/dateFormatters";
-import type { Booking } from "@/types/booking";
+import { getFacilitiesForStaff } from '@/lib/facilities';
+import { db } from '@/lib/firebase';
+import { createNotification } from '@/lib/notifications';
+import { formatDate } from '@/lib/utils/date';
+import type { Booking } from '@/types/booking';
 
 /**
  * Gets all bookings for a member.

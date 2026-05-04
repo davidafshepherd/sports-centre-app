@@ -1,6 +1,6 @@
-import type { BookingStatus } from "@/types/booking";
-import type { BookingRequestStatus } from "@/types/bookingRequest";
-import type { ReportStatus } from "@/types/equipmentReport";
+import type { BookingStatus } from '@/types/booking';
+import type { BookingRequestStatus } from '@/types/bookingRequest';
+import type { ReportStatus } from '@/types/equipmentReport';
 
 const REQUEST_STATUS_LABELS: Record<BookingRequestStatus, string> = {
     pending: 'Pending',

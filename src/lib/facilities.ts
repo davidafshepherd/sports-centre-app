@@ -9,16 +9,16 @@ import {
     where, 
     arrayUnion, 
     arrayRemove,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 
-import { db } from "@/lib/firebase";
-import type { Facility } from "@/types/facility";
+import { db } from '@/lib/firebase';
+import type { Facility } from '@/types/facility';
 
 /**
  * Gets all facilities, including inactive facilities.
  * @returns List of facilities sorted by name.
  */
-export async function getAllFacilities(): Promise<Facility[]> {
+export async function getFacilities(): Promise<Facility[]> {
     // Fetch all facilities from Firestore
     const snap = await getDocs(collection(db, 'facilities'));
 
