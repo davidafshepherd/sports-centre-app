@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FirebaseError } from "firebase/app";
-import { X } from "lucide-react";
-import { useAuth } from "@/providers/AuthProvider";
-import { registerFormSchema, RegisterForm } from "@/features/auth/schemas/registerFormSchema";
-import PersonalDetailsFieldset from "./fieldsets/PersonalDetailsFieldset";
-import AccountDetailsFieldset from "./fieldsets/AccountDetailsFieldset";
-import AddressFieldset from "./fieldsets/AddressFieldset";
-import { registerFirebaseError } from "@/features/auth/utils/mapFirebaseErrors";
+import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { FirebaseError } from 'firebase/app';
+import { X } from 'lucide-react';
+import { useAuth } from '@/providers/AuthProvider';
+import { registerFormSchema, RegisterForm } from '@/lib/schemas/registerFormSchema';
+import PersonalDetailsFieldset from './fieldsets/PersonalDetailsFieldset';
+import AccountDetailsFieldset from './fieldsets/AccountDetailsFieldset';
+import AddressFieldset from './fieldsets/AddressFieldset';
+import { registerFirebaseError } from '@/lib/utils/FirebaseErrors';
 
 // Shape of component's props
 interface Props {
@@ -18,26 +18,26 @@ interface Props {
 }
 
 export default function RegisterFormCard({ onClose }: Props) {
-    // Functions used to register user
+    // Function used to register user
     const { register } = useAuth();
 
-    // Submission error message
+    // Form submission error message
     const [submitError, setSubmitError] = useState<string | null>(null);
 
     // Initialise form with Zod validation 
     const form = useForm<RegisterForm>({
         resolver: zodResolver(registerFormSchema),
-        mode: "onChange",
+        mode: 'onChange',
     });
 
     // Watch password fields in form
-    const passwordValue = useWatch({ control: form.control, name: "password" });
-    const confirmPasswordValue = useWatch({ control: form.control, name: "confirmPassword" });
+    const passwordValue = useWatch({ control: form.control, name: 'password' });
+    const confirmPasswordValue = useWatch({ control: form.control, name: 'confirmPassword' });
 
     // Password match validation
     const confirmPasswordError =
         confirmPasswordValue && passwordValue !== confirmPasswordValue
-            ? "Passwords do not match"
+            ? 'Passwords do not match'
             : form.formState.errors.confirmPassword?.message;
 
     // Handle form submission
@@ -50,8 +50,8 @@ export default function RegisterFormCard({ onClose }: Props) {
             // Close register modal
             onClose();
         } catch (error) {
-            // Update submission error message
-            const code = error instanceof FirebaseError ? error.code : "";
+            // Update form submission error message
+            const code = error instanceof FirebaseError ? error.code : '';
             setSubmitError(registerFirebaseError(code));
         }
     }

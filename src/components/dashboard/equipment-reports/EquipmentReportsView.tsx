@@ -9,10 +9,11 @@ import {
     getAllEquipmentReports,
     updateEquipmentReportStatus,
 } from "@/lib/equipmentReports"
-import { getFacilities } from "@/lib/facilities"
+import { getActiveFacilities } from "@/lib/facilities"
 import type { EquipmentReport, ReportStatus } from "@/types/equipmentReport"
 import type { Facility } from "@/types/facility"
-import { reportStatusColour, reportStatusLabel, formatDate } from "@/lib/utils"
+import { reportStatusColour, reportStatusLabel } from "@/lib/utils/status"
+import { formatDate } from "@/lib/utils/date"
 import { Wrench, Plus, ChevronDown } from "lucide-react"
 
 // ── Report form modal ──────────────────────────────────────────────────────
@@ -219,7 +220,7 @@ export default function EquipmentReportsView() {
                 : role === "staff"
                     ? getEquipmentReportsForStaff(user.uid)
                     : getAllEquipmentReports(),
-            role === "member" ? getFacilities() : Promise.resolve([] as Facility[]),
+            role === "member" ? getActiveFacilities() : Promise.resolve([] as Facility[]),
         ])
         setReports(rpts)
         setFacilities(facs)

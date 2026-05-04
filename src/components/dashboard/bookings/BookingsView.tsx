@@ -1,32 +1,58 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { useAuth } from "@/providers/AuthProvider"
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useAuth } from "@/providers/AuthProvider";
 import {
-    getBookingsForMember, getBookingRequestsForMember,
-    getBookingsForStaff, getBookingRequestsForStaff,
-    getBookingsForFacility, getUpcomingBookingsForFacility,
-    approveBookingRequest, rejectBookingRequest, suggestAlternative,
-    cancelBooking, markBookingComplete,
-    acceptAlternativeSuggestion, rejectAlternativeSuggestion,
-    confirmBookingSlot, cancelBookingRequest,
-} from "@/lib/bookings"
-import { getFacilities, getFacilityById } from "@/lib/facilities"
-import type { Booking, BookingRequest } from "@/types/booking"
-import type { Facility } from "@/types/facility"
+    getBookingRequestsForMember,
+    getBookingRequestsForStaff,
+    approveBookingRequest, 
+    rejectBookingRequest, 
+    suggestAlternative,
+    acceptAlternativeSuggestion, 
+    rejectAlternativeSuggestion,
+    confirmBookingSlot, 
+    cancelBookingRequest,
+} from "@/lib/bookingRequests";
 import {
-    formatSlot, formatDateTime,
-    bookingStatusColour, bookingStatusLabel,
-    requestStatuscolour, requestStatusLabel,
-    getMinBookingDate, getMaxBookingDate,
-} from "@/lib/utils"
+    getBookingsForMember, 
+    getBookingsForStaff, 
+    getBookingsForFacility, 
+    getUpcomingBookingsForFacility,
+    cancelBooking, 
+    markBookingComplete,
+} from "@/lib/bookings";
+import { getActiveFacilities, getFacilityById } from "@/lib/facilities";
+import type { BookingRequest } from "@/types/bookingRequest";
+import type { Booking } from "@/types/booking";
+import type { Facility } from "@/types/facility";
+import { JS_DAYS } from "@/lib/utils/openingHours";
+import {formatSlot, 
+    formatDateTime, 
+    getMinBookingDate, 
+    getMaxBookingDate,
+
+} from "@/lib/utils/date";
 import {
-    CalendarDays, CheckCircle, XCircle, Repeat,
-    Clock, MapPin, CheckCircle2,
-    ChevronDown, ArrowUp, ArrowDown, Search,
-} from "lucide-react"
+    bookingStatusColour, 
+    bookingStatusLabel,
+    requestStatuscolour, 
+    requestStatusLabel,
+} from "@/lib/utils/status";
+import {
+    CalendarDays, 
+    CheckCircle, 
+    XCircle, 
+    Repeat,
+    Clock, 
+    MapPin, 
+    CheckCircle2,
+    ChevronDown, 
+    ArrowUp, 
+    ArrowDown, 
+    Search,
+} from "lucide-react";
 
 // ── Category config ────────────────────────────────────────────────────────
 
@@ -47,14 +73,6 @@ function parseTimeToMins(t: string): number {
 }
 
 // ── Shared UI helpers ──────────────────────────────────────────────────────
-
-function Badge({ label, colour }: { label: string; colour: string }) {
-    return (
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${colour}`}>
-            {label}
-        </span>
-    )
-}
 
 function Tabs({ tabs, active, onChange }: {
     tabs: { id: string; label: string; count?: number }[]
@@ -107,19 +125,6 @@ function CardPhoto({ category, name }: { category?: string; name: string }) {
     )
 }
 
-// SideThumb is used in list cards (left-side portrait image)
-function SideThumb({ category, name }: { category?: string; name: string }) {
-    const cfg = category ? CATEGORY_CONFIG[category] : null
-    return (
-        <div className="relative w-48 self-stretch bg-slate-100 shrink-0">
-            {cfg && (
-                <Image src={cfg.image} alt={name} fill className="object-cover" sizes="384px" quality={90} loading="eager" />
-            )}
-            <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
-        </div>
-    )
-}
-
 function formatCardDate(dateStr: string): string {
     const [y, m, d] = dateStr.split("-").map(Number)
     return new Date(y, m - 1, d).toLocaleDateString("en-GB", {
@@ -138,8 +143,6 @@ function MemberAvatar({ name }: { name: string }) {
 }
 
 // ── Slot picker ────────────────────────────────────────────────────────────
-
-const JS_DAYS = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"] as const
 
 function getSlotsForFacilityDate(facility: Facility, dateStr: string): number[] {
     if (!dateStr) return []
@@ -183,7 +186,7 @@ function SlotGrid({ slots, booked, selected, loading, onSelect, slotDurationMins
                                         ? "bg-sky-600 text-white border-sky-600 cursor-pointer"
                                         : "bg-white text-slate-700 border-slate-300 hover:border-sky-400 hover:bg-sky-50 cursor-pointer",
                             ].join(" ")}>
-                            {formatSlot(slot, slotDurationMins).split("–")[0].trim()}
+                            {formatSlot(slot, slotDurationMins).split("-")[0].trim()}
                         </button>
                     )
                 })}
@@ -249,7 +252,7 @@ function ConfirmSlotModal({ request, onClose, onDone }: {
         setSubmitting(true)
         setError("")
         try {
-            await confirmBookingSlot(request.id, request, user.uid, date, slotStart, slotDurMins)
+            await confirmBookingSlot(request.id, request, date, slotStart, slotDurMins)
             onDone()
         } catch {
             setError("Failed to confirm booking. Please try again.")
@@ -544,7 +547,7 @@ function MemberBookingsTab() {
         const [b, r, facilities] = await Promise.all([
             getBookingsForMember(user.uid),
             getBookingRequestsForMember(user.uid),
-            getFacilities(),
+            getActiveFacilities(),
         ])
         setBookings(b)
         setRequests(r)
@@ -557,7 +560,7 @@ function MemberBookingsTab() {
     async function handleCancel(booking: Booking) {
         if (!user) return
         setCancelling(booking.id)
-        await cancelBooking(booking.id, booking, "member")
+        await cancelBooking(booking.id)
         setCancelling(null)
         load()
     }
@@ -1101,7 +1104,7 @@ function StaffBookingsTab() {
         const [reqs, bkgs, facilities] = await Promise.all([
             getBookingRequestsForStaff(user.uid),
             getBookingsForStaff(user.uid),
-            getFacilities(),
+            getActiveFacilities(),
         ])
         setRequests(reqs)
         setBookings(bkgs)
