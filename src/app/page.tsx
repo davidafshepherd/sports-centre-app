@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/providers/AuthProvider";
-import HomeView from "@/components/home/HomeView";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import DashboardView from "@/components/dashboard/DashboardView";
-import ProfileErrorScreen from "@/components/ui/ProfileErrorScreen";
+import { useAuth } from '@/providers/AuthProvider';
+import HomeView from '@/components/home/HomeView';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardView from '@/components/dashboard/DashboardView';
+import ProfileErrorScreen from '@/components/ui/ProfileErrorScreen';
 
 export default function Page() {
     // Access authentication context
