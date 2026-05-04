@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { RegisterForm } from "../../../features/auth/schemas/registerFormSchema";
-import { inputClass, FieldError } from "../formHelpers";
+import { UseFormRegister, FieldErrors } from 'react-hook-form';
+import { RegisterForm } from '@/lib/schemas/registerFormSchema';
+import { inputClass, FieldError } from '@/lib/utils/formHelpers';
 
 // Shape of component's props
 interface Props {

@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import { useAuth } from "@/providers/AuthProvider"
-import { useRouter } from "next/navigation"
-import DashboardLayout from "@/components/layout/DashboardLayout"
-import PartnersView from "@/components/dashboard/partners/PartnersView"
-import LoadingScreen from "@/components/ui/LoadingScreen"
+import { useAuth } from '@/providers/AuthProvider';
+import { useRouter } from 'next/navigation';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import PartnersView from '@/components/dashboard/partners/PartnersView';
+import LoadingScreen from '@/components/ui/LoadingScreen';
 
 export default function PartnersPage() {
     // Access authentication context and router
@@ -12,9 +12,9 @@ export default function PartnersPage() {
     const router = useRouter();
 
     // Navigate to root route if user is not authenticated or is not a member
-    if (!user || !userProfile || userProfile.role !== "member") { 
-        router.replace("/"); 
-        return <LoadingScreen /> 
+    if (!user || !userProfile || userProfile.role !== 'member') { 
+        router.replace('/'); 
+        return <LoadingScreen /> ;
     }
 
     // Render partners view
@@ -22,5 +22,5 @@ export default function PartnersPage() {
         <DashboardLayout>
             <PartnersView />
         </DashboardLayout>
-    )
+    );
 }

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@/providers/AuthProvider";
-import { loginFormSchema, LoginForm } from "../../features/auth/schemas/loginFormSchema";
-import { inputClass, FieldError } from "./formHelpers";
-import { loginFirebaseError, googleSignInFirebaseError } from "../../features/auth/utils/mapFirebaseErrors";
-import { FirebaseError } from "firebase/app";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/providers/AuthProvider';
+import { loginFormSchema, LoginForm } from '@/lib/schemas/loginFormSchema';
+import { inputClass, FieldError } from '@/lib/utils/formHelpers';
+import { loginFirebaseError, googleSignInFirebaseError } from '@/lib/utils/FirebaseErrors';
+import { FirebaseError } from 'firebase/app';
 
 // Shape of component's props
 interface Props {
@@ -22,7 +22,7 @@ export default function LoginFormCard({ onRegisterClick }: Props) {
     // Initialise form with Zod validation 
     const form = useForm<LoginForm>({
         resolver: zodResolver(loginFormSchema),
-        mode: "onChange",
+        mode: 'onChange',
     });
 
     // Handle form submission
@@ -34,7 +34,7 @@ export default function LoginFormCard({ onRegisterClick }: Props) {
             await login(data);
         } catch (error) {
             // Update submission error message
-            const code = error instanceof FirebaseError ? error.code : "";
+            const code = error instanceof FirebaseError ? error.code : '';
             setSubmitError(loginFirebaseError(code));
         }
     }
@@ -48,7 +48,7 @@ export default function LoginFormCard({ onRegisterClick }: Props) {
             await loginWithGoogle();
         } catch (error) {
             // Update sign-in error message
-            const code = error instanceof FirebaseError ? error.code : "";
+            const code = error instanceof FirebaseError ? error.code : '';
             setGoogleError(googleSignInFirebaseError(code));
         }
     }
@@ -75,7 +75,7 @@ export default function LoginFormCard({ onRegisterClick }: Props) {
 
                 {/* Login form */}
                 <form onSubmit={form.handleSubmit(onSubmit)} method="post" noValidate className="space-y-4">
-                {/* Email input */}
+                    {/* Email input */}
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
                             Email address

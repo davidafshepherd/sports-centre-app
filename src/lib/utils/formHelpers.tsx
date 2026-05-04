@@ -6,12 +6,11 @@ export function inputClass(hasError: boolean) {
         hasError
             ? "border-red-400 focus:ring-red-400"
             : "border-slate-300 focus:ring-slate-400",
-    ].join(" ");
+    ].join(" ")
 }
 
 // Display an input validation error message if present
 export function FieldError({ message }: { message?: string }) {
-    if (!message) return null;
-    return <p className="mt-1 text-xs text-red-600">{message}</p>;
+    if (!message) return null
+    return <p className="mt-1 text-xs text-red-600">{message}</p>
 }
-

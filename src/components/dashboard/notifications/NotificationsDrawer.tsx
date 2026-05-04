@@ -8,8 +8,8 @@ import {
     markAllNotificationsRead,
     deleteNotifications,
 } from "@/lib/notifications"
-import type { AppNotification, NotificationType } from "@/types/notification"
-import { formatRelativeTime } from "@/lib/utils"
+import type { Notification, NotificationType } from "@/types/notification"
+import { formatRelativeTime } from "@/lib/utils/date"
 import {
     X, Check, CheckCheck, Bell,
     CalendarDays, UserCheck, UserX, Wrench,
@@ -44,7 +44,7 @@ interface Props {
 
 export default function NotificationsDrawer({ open, onClose }: Props) {
     const { user } = useAuth()
-    const [notifications, setNotifications] = useState<AppNotification[]>([])
+    const [notifications, setNotifications] = useState<Notification[]>([])
     const [loading, setLoading] = useState(false)
     const [markingAll, setMarkingAll] = useState(false)
 
@@ -57,7 +57,7 @@ export default function NotificationsDrawer({ open, onClose }: Props) {
             .finally(() => setLoading(false))
     }, [open, user])
 
-    async function handleMarkRead(notif: AppNotification) {
+    async function handleMarkRead(notif: Notification) {
         if (notif.read) return
         await markNotificationRead(notif.id)
         setNotifications(prev =>

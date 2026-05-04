@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Dumbbell, Check } from "lucide-react";
-import LoginFormCard from "@/components/auth/LoginForm";
-import RegisterFormCard from "@/components/auth/RegisterForm";
+import { useEffect, useState } from 'react';
+import { Dumbbell, Check } from 'lucide-react';
+import LoginFormCard from '@/components/auth/LoginForm';
+import RegisterFormCard from '@/components/auth/RegisterForm';
 
 // Feature list displayed in left panel
 const features = [
-    "Book courts, pitches and more",
-    "Track your booking history",
-    "Find activity partners",
+    'Book courts, pitches and more',
+    'Track your booking history',
+    'Find activity partners',
 ];
 
 export default function HomeView() {
@@ -18,8 +18,8 @@ export default function HomeView() {
 
     // Disable page scrolling when register modal is visible
     useEffect(() => {
-        document.body.style.overflow = showRegister ? "hidden" : "";
-        return () => { document.body.style.overflow = ""; };
+        document.body.style.overflow = showRegister ? 'hidden' : '';
+        return () => { document.body.style.overflow = ''; };
     }, [showRegister]);
 
     return (
