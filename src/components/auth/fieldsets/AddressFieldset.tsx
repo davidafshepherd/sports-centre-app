@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { UseFormRegister, UseFormSetValue, FieldErrors } from "react-hook-form";
-import { RegisterForm } from "../../../features/auth/schemas/registerFormSchema";
-import { inputClass, FieldError } from "../formHelpers";
+import { useState } from 'react';
+import { UseFormRegister, UseFormSetValue, FieldErrors } from 'react-hook-form';
+import { RegisterForm } from '@/lib/schemas/registerFormSchema';
+import { inputClass, FieldError } from '@/lib/utils/formHelpers';
 
 // Shape of component's props
 interface Props {
@@ -23,7 +23,7 @@ interface AddressResult {
 }
 
 export default function AddressFieldset({ register, errors, setValue }: Props) {
-    const [addressStep, setAddressStep] = useState<"postcode" | "select" | "fields">("postcode");   // Address input step
+    const [addressStep, setAddressStep] = useState<'postcode' | 'select' | 'fields'>('postcode');   // Address input step
     const [postcodeInput, setPostcodeInput] = useState("");                                         // Postcode entered for lookup
     const [addresses, setAddresses] = useState<AddressResult[]>([]);                                // Postcode lookup results
     const [lookupLoading, setLookupLoading] = useState(false);                                      // Whether lookup is in progress
@@ -33,7 +33,7 @@ export default function AddressFieldset({ register, errors, setValue }: Props) {
     async function findAddress() {
         // Check if postcode input is empty
         if (!postcodeInput.trim()) {
-            setLookupError("Please enter a postcode.");
+            setLookupError('Please enter a postcode.');
             return;
         }
         
@@ -50,7 +50,7 @@ export default function AddressFieldset({ register, errors, setValue }: Props) {
 
             // Show error if no results returned
             if (!res.ok || !data.result || data.result.length === 0) {
-                setLookupError("No addresses found. Please check the postcode or enter your address manually.");
+                setLookupError('No addresses found. Please check the postcode or enter your address manually.');
                 return;
             }
             
@@ -58,7 +58,7 @@ export default function AddressFieldset({ register, errors, setValue }: Props) {
             setAddresses(data.result);
             setAddressStep("select");
         } catch {
-            setLookupError("Address lookup failed. Please try again or enter your address manually.");
+            setLookupError('Address lookup failed. Please try again or enter your address manually.');
         } finally {
             setLookupLoading(false);
         }
@@ -71,31 +71,31 @@ export default function AddressFieldset({ register, errors, setValue }: Props) {
         if (!addr) return;
 
         // Combine address line 2 and address line 3
-        const line2 = [addr.line_2, addr.line_3].filter(Boolean).join(", ");
+        const line2 = [addr.line_2, addr.line_3].filter(Boolean).join(', ');
 
         // Update form values with selected address
-        setValue("address.line1", addr.line_1, { shouldValidate: true });
-        setValue("address.line2", line2, { shouldValidate: true });
-        setValue("address.townOrCity", addr.post_town, { shouldValidate: true });
-        setValue("address.county", addr.county, { shouldValidate: true });
-        setValue("address.postcode", addr.postcode, { shouldValidate: true });
-        setAddressStep("fields");
+        setValue('address.line1', addr.line_1, { shouldValidate: true });
+        setValue('address.line2', line2, { shouldValidate: true });
+        setValue('address.townOrCity', addr.post_town, { shouldValidate: true });
+        setValue('address.county', addr.county, { shouldValidate: true });
+        setValue('address.postcode', addr.postcode, { shouldValidate: true });
+        setAddressStep('fields');
     }
 
     // Reset postcode lookup
     function resetAddress() {
         // Reset lookup state
-        setPostcodeInput("");
+        setPostcodeInput('');
         setAddresses([]);
         setLookupError(null);
-        setAddressStep("postcode");
+        setAddressStep('postcode');
 
         // Clear address fields
-        setValue("address.line1", "");
-        setValue("address.line2", "");
-        setValue("address.townOrCity", "");
-        setValue("address.county", "");
-        setValue("address.postcode", "");
+        setValue('address.line1', '');
+        setValue('address.line2', '');
+        setValue('address.townOrCity', '');
+        setValue('address.county', '');
+        setValue('address.postcode', '');
     }
 
     return (

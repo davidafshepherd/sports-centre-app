@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import { useAuth } from "@/providers/AuthProvider"
-import { AlertCircle } from "lucide-react"
+import { useAuth } from '@/providers/AuthProvider';
+import { AlertCircle } from 'lucide-react';
 
 export default function ProfileErrorScreen() {
-    const { logout } = useAuth()
+    const { logout } = useAuth();
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen gap-6 p-4">
@@ -16,11 +16,11 @@ export default function ProfileErrorScreen() {
                 </p>
             </div>
             <button
-                onClick={logout}
                 className="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors"
+                onClick={logout}
             >
                 Sign out
             </button>
         </div>
-    )
+    );
 }

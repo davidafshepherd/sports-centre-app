@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import { useAuth } from "@/providers/AuthProvider"
-import { useRouter } from "next/navigation"
-import { use } from "react"
-import DashboardLayout from "@/components/layout/DashboardLayout"
-import FacilityDetailsView from "@/components/dashboard/facilities/FacilityDetailsView"
-import LoadingScreen from "@/components/ui/LoadingScreen"
+import { useAuth } from '@/providers/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { use } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import FacilityDetailsView from '@/components/dashboard/facility-details/FacilityDetailsView';
+import LoadingScreen from '@/components/ui/LoadingScreen';
 
 // Shape of component's props
 interface Props {
@@ -22,8 +22,8 @@ export default function FacilityDetailPage({ params }: Props) {
 
     // Navigate to root route if user is not authenticated
     if (!user || !userProfile) { 
-        router.replace("/"); 
-        return <LoadingScreen /> 
+        router.replace('/'); 
+        return <LoadingScreen />; 
     }
 
     // Render facility details view
@@ -31,5 +31,5 @@ export default function FacilityDetailPage({ params }: Props) {
         <DashboardLayout>
             <FacilityDetailsView facilityId={id} />
         </DashboardLayout>
-    )
+    );
 }

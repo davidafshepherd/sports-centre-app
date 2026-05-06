@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 // Handle GET request for postcode lookup
 export async function GET(req: NextRequest) {
     // Extract postcode from query parameters
-    const postcode = req.nextUrl.searchParams.get("postcode");
+    const postcode = req.nextUrl.searchParams.get('postcode');
 
     // Return 400 if postcode is missing
     if (!postcode) {
-        return NextResponse.json({ error: "Postcode required" }, { status: 400 });
+        return NextResponse.json({ error: 'Postcode required' }, { status: 400 });
     }
 
     // Get API key from environment variables
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     // Return 500 if API key is not configured
     if (!apiKey) {
-        return NextResponse.json({ error: "Address lookup not configured" }, { status: 500 });
+        return NextResponse.json({ error: 'Address lookup not configured' }, { status: 500 });
     }
 
     // Call IdealPostcodes API with encoded postcode

@@ -1,11 +1,6 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
-import { UserProfile } from "@/types/user";
-import { LoginForm } from "@/features/auth/schemas/loginFormSchema";
-import { RegisterForm } from "@/features/auth/schemas/registerFormSchema";
+import { createContext, useContext,  useEffect, useState } from 'react';
 import {
     User,
     signInWithEmailAndPassword,
@@ -15,8 +10,13 @@ import {
     onAuthStateChanged,
     GoogleAuthProvider,
     signInWithPopup,
-} from "firebase/auth";
-import LoadingScreen from "@/components/ui/LoadingScreen";
+} from 'firebase/auth';
+import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
+import LoadingScreen from '@/components/ui/LoadingScreen';
+import { auth, db } from '@/lib/firebase';
+import { LoginForm } from '@/lib/schemas/loginFormSchema';
+import { RegisterForm } from '@/lib/schemas/registerFormSchema';
+import { UserProfile } from '@/types/user';
 
 // Define shape of authentication context
 interface AuthContextValue {

@@ -3,7 +3,7 @@ import { collection, doc, getDocs, addDoc, updateDoc, query, where } from "fireb
 import type { EquipmentReport, ReportStatus } from "@/types/equipmentReport"
 import { getFacilitiesForStaff } from "@/lib/facilities"
 import { createNotification } from "@/lib/notifications"
-import { reportStatusLabel } from "@/lib/utils"
+import { reportStatusLabel } from "@/lib/utils/status"
 
 export async function createEquipmentReport(data: {
     reportedBy: string
