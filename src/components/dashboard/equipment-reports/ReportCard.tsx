@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react"
-import { reportStatusColour, reportStatusLabel, formatDate, formatDateTime } from "@/lib/utils"
+import { reportStatusColour, reportStatusLabel } from "@/lib/utils/status"
+import { formatDate, formatDateTime } from "@/lib/utils/date"
 import type { EquipmentReport } from "@/types/equipmentReport"
 
 interface Props {

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { updateEquipmentReportStatus } from "@/lib/equipmentReports"
-import { reportStatusLabel } from "@/lib/utils"
+import { reportStatusLabel } from "@/lib/utils/status"
 import type { EquipmentReport, ReportStatus } from "@/types/equipmentReport"
 
 interface Props {
