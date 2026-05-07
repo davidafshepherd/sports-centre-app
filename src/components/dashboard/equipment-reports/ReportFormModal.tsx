@@ -1,6 +1,9 @@
+"use client"
+
 import { useState } from "react"
 import { createEquipmentReport } from "@/lib/equipmentReports"
 import type { Facility } from "@/types/facility"
+import { createPortal } from "react-dom"
 
 interface Props {
     facilities: Facility[]
@@ -45,8 +48,7 @@ export default function ReportFormModal({ facilities, memberId, memberName, onCl
         }
     }
 
-    return (
-        // clicking outside the modal closes it
+    return createPortal(
         <div
             className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
@@ -128,6 +130,7 @@ export default function ReportFormModal({ facilities, memberId, memberName, onCl
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }

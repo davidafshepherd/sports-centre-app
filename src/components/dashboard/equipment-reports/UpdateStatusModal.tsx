@@ -1,7 +1,10 @@
+"use client"
+
 import { useState } from "react"
 import { updateEquipmentReportStatus } from "@/lib/equipmentReports"
 import { reportStatusLabel } from "@/lib/utils/status"
 import type { EquipmentReport, ReportStatus } from "@/types/equipmentReport"
+import { createPortal } from "react-dom"
 
 interface Props {
     report: EquipmentReport
@@ -27,8 +30,7 @@ export default function UpdateStatusModal({ report, staffUid, onClose, onUpdated
         onUpdated()
     }
 
-    return (
-        // clicking outside the modal closes it
+    return createPortal(
         <div
             className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
             onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
@@ -93,6 +95,7 @@ export default function UpdateStatusModal({ report, staffUid, onClose, onUpdated
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }
