@@ -8,7 +8,7 @@ import EquipmentReportsView from '@/components/dashboard/equipment-reports/Equip
 import LoadingScreen from '@/components/ui/LoadingScreen';
 
 export default function EquipmentReportsPage() {
-    // Access authentication context and router
+    // access authentication context and router
     const { user, userProfile } = useAuth();
     const router = useRouter();
 
@@ -20,7 +20,6 @@ export default function EquipmentReportsPage() {
     // Render loading screen if user is not authenticated or authorised (while redirect takes place)
     if (!user || !userProfile || !['member', 'staff'].includes(userProfile.role)) return <LoadingScreen />;
 
-    // Render equipment reports view
     return (
         <DashboardLayout>
             <EquipmentReportsView />
