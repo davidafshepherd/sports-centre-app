@@ -34,3 +34,15 @@ export async function getUsersByIds(ids: string[]): Promise<UserProfile[]> {
 export async function updateUserMembershipStatus(id: string, status: MembershipStatus): Promise<void> {
     await updateDoc(doc(db, 'users', id), { membershipStatus: status });
 }
+
+/**
+ * Updates editable profile fields for a user.
+ * @param id User's ID.
+ * @param data Fields to update.
+ */
+export async function updateUserProfile(
+    id: string,
+    data: Partial<Pick<UserProfile, 'firstName' | 'lastName' | 'dateOfBirth' | 'address'>>,
+): Promise<void> {
+    await updateDoc(doc(db, 'users', id), data as Record<string, unknown>);
+}
