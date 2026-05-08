@@ -21,9 +21,11 @@ export default function MemberDashboard() {
     const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);      // All upcoming bookings
     const [todayBookings, setTodayBookings] = useState<Booking[]>([]);            // Today's upcoming bookings (up to 3)
     const [loading, setLoading] = useState(true);                                 // Whether data is still being fetched
+
     const [cancelling, setCancelling] = useState<string | null>(null);            // ID of the booking being cancelled
     const [loadKey, setLoadKey] = useState(0);                                    // Counter incremented to trigger a re-fetch
     const reload = useCallback(() => { setLoading(true); setLoadKey(k => k + 1); }, []); // Trigger a data re-fetch
+    
     const [confirmCancel, setConfirmCancel] = useState(false);                    // Whether the cancel membership modal is open
     const [deletingAccount, setDeletingAccount] = useState(false);               // Whether account deletion is in progress
 
