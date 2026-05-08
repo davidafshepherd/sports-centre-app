@@ -21,12 +21,13 @@ import AlternativeSuggestionModal from '../modals/AlternativeSuggestionModal';
 interface Props {
     requests: BookingRequest[];
     allFacilities: Facility[];
+    assignedFacilities: Facility[];
     facilityMap: Record<string, Facility>;
     facilityAvailability: Record<string, { booked: number; total: number }>;
     onLoad: () => void;
 }
 
-export default function StaffPendingTab({ requests, allFacilities, facilityMap, facilityAvailability, onLoad }: Props) {
+export default function StaffPendingTab({ requests, allFacilities, assignedFacilities, facilityMap, facilityAvailability, onLoad }: Props) {
     const { user } = useAuth();
     const [sortDir, setSortDir] = useState<SortDir>('desc');                                                                    // Sort direction for the table
     const [filterFacility, setFilterFacility] = useState('');                                                                   // Active facility filter
@@ -47,8 +48,8 @@ export default function StaffPendingTab({ requests, allFacilities, facilityMap, 
         onLoad();
     }
 
-    // Unique facility names from the current requests, for the filter dropdown
-    const facilityOptions = [...new Set(requests.map(r => r.facilityName))].sort();
+    // Names of facilities assigned to the staff member
+    const facilityOptions = assignedFacilities.map(f => f.name).sort();
 
     // Filter and sort the requests
     const filteredRequests = requests

@@ -1,8 +1,8 @@
 'use client';
 
+import { use, useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
-import { use } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FacilityDetailsView from '@/components/dashboard/facility-details/FacilityDetailsView';
 import LoadingScreen from '@/components/ui/LoadingScreen';
@@ -21,10 +21,12 @@ export default function FacilityDetailPage({ params }: Props) {
     const { id } = use(params);
 
     // Navigate to root route if user is not authenticated
-    if (!user || !userProfile) { 
-        router.replace('/'); 
-        return <LoadingScreen />; 
-    }
+    useEffect(() => {
+        if (!user || !userProfile) router.replace('/');
+    }, [user, userProfile, router]);
+
+    // Render loading screen if user is not authenticated (while redirect takes place)
+    if (!user || !userProfile) return <LoadingScreen />;
 
     // Render facility details view
     return (

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -11,13 +12,14 @@ export default function PartnersPage() {
     const { user, userProfile } = useAuth();
     const router = useRouter();
 
-    // Navigate to root route if user is not authenticated or is not a member
-    if (!user || !userProfile || userProfile.role !== 'member') { 
-        router.replace('/'); 
-        return <LoadingScreen /> ;
-    }
+    // Navigate to root route if user is not authenticated or is not authorised
+    useEffect(() => {
+        if (!user || !userProfile || userProfile.role !== 'member') router.replace('/');
+    }, [user, userProfile, router]);
 
-    // Render partners view
+    // Render loading screen if user is not authenticated or authorised (while redirect takes place)
+    if (!user || !userProfile || userProfile.role !== 'member') return <LoadingScreen />;
+
     return (
         <DashboardLayout>
             <PartnersView />

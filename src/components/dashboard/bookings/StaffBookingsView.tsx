@@ -67,6 +67,7 @@ export default function StaffBookingsView() {
 
     // Derive maps and subsets for each tab
     const facilityMap = Object.fromEntries(allFacilities.map(f => [f.id, f]));
+    const assignedFacilities = user ? allFacilities.filter(f => f.assignedStaffIds.includes(user.uid)) : [];
     const pending = requests.filter(r => r.status === 'pending');
     const sessions = bookings.filter(b => b.status === 'upcoming');
 
@@ -89,6 +90,7 @@ export default function StaffBookingsView() {
                 <StaffPendingTab
                     requests={pending}
                     allFacilities={allFacilities}
+                    assignedFacilities={assignedFacilities}
                     facilityMap={facilityMap}
                     facilityAvailability={facilityAvailability}
                     onLoad={load}
@@ -99,6 +101,7 @@ export default function StaffBookingsView() {
             {tab === 'sessions' && (
                 <StaffSessionsTab
                     bookings={sessions}
+                    assignedFacilities={assignedFacilities}
                     facilityMap={facilityMap}
                     onLoad={load}
                 />

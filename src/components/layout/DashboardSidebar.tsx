@@ -22,11 +22,11 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/facilities", label: "Facilities", icon: Building2, roles: ["member", "admin"] },
-    { href: "/bookings", label: "Bookings", icon: CalendarDays },
+    { href: "/facilities", label: "Facilities", icon: Building2, roles: ["member", "staff", "admin"] },
+    { href: "/bookings", label: "Bookings", icon: CalendarDays, roles: ["member", "staff"] },
     { href: "/partners", label: "Find Partners", icon: UserSearch, roles: ["member"] },
     { href: "/equipment-reports", label: "Equipment", icon: Wrench, roles: ["member", "staff"] },
-    { href: "/members", label: "Members", icon: Users, roles: ["admin"] },
+    { href: "/staff", label: "Staff", icon: Users, roles: ["admin"] },
 ]
 
 interface Props {

@@ -48,15 +48,16 @@ export default function ConfirmSlotModal({ request, onClose, onDone }: Props) {
     // Hide slots that have already started today
     const visibleSlots = date === today ? allSlots.filter(slot => slot >= nowMins) : allSlots;
 
-    // Slots unavailable due to capacity or already booked by this member
-    const slotCountMap = existingBookings.reduce<Record<number, number>>((acc, b) => {
-        acc[b.slotStart] = (acc[b.slotStart] ?? 0) + 1;
-        return acc;
-    }, {});
-    const unavailableSlots = [...new Set([
-        ...existingBookings.filter(b => (slotCountMap[b.slotStart] ?? 0) >= maxCap).map(b => b.slotStart),
-        ...existingBookings.filter(b => b.memberId === user?.uid).map(b => b.slotStart),
-    ])];
+    // Slots unavailable because they're at capacity or the member already has an overlapping booking.
+    // A booking occupies a slot if their time ranges overlap: [slotStart, slotStart+dur) ∩ [b.slotStart, b.slotEnd).
+    // This correctly handles slot-duration changes — existing bookings can span multiple new slots.
+    const unavailableSlots = allSlots.filter(slot => {
+        const slotEnd = slot + slotDurMins;
+        const overlapping = existingBookings.filter(b => b.slotStart < slotEnd && b.slotEnd > slot);
+        const atCapacity = overlapping.length >= maxCap;
+        const userBooked = overlapping.some(b => b.memberId === user?.uid);
+        return atCapacity || userBooked;
+    });
 
     // Reload existing bookings whenever the date changes
     useEffect(() => {

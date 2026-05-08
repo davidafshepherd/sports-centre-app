@@ -9,7 +9,8 @@ export type NotificationType =
     | 'partner_request'
     | 'partner_accepted'
     | 'partner_rejected'
-    | 'equipment_report_updated';
+    | 'equipment_report_updated'
+    | 'facility_updated';
 
 export interface Notification {
     id: string;
@@ -19,6 +20,6 @@ export interface Notification {
     message: string;
     read: boolean;
     relatedId?: string;
-    relatedType?: 'booking' | 'bookingRequest' | 'partnerRequest' | 'equipmentReport';
+    relatedType?: 'booking' | 'bookingRequest' | 'partnerRequest' | 'equipmentReport' | 'facility';
     createdAt: string;
 }
