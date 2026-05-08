@@ -114,18 +114,18 @@ export default function ReportFormModal({ facilities, memberId, memberName, onCl
 
                     <div className="flex gap-3 pt-1">
                         <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 font-medium hover:bg-slate-50 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
                             type="submit"
                             disabled={submitting}
-                            className="flex-1 py-2.5 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 disabled:opacity-60 transition-colors"
+                            className="flex-1 py-2.5 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer transition-colors"
                         >
                             {submitting ? "Submitting…" : "Submit Report"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-700 font-medium hover:bg-slate-50 cursor-pointer transition-colors"
+                        >
+                            Cancel
                         </button>
                     </div>
                 </form>

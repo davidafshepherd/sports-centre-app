@@ -1,51 +1,49 @@
-"use client"
+'use client';
 
-import { useEffect, useState, useCallback } from "react"
-import { Send, UserSearch } from "lucide-react"
-import { useAuth } from "@/providers/AuthProvider"
-import { searchPartnerProfiles } from "@/lib/partners"
-import { SPORTS, AVAILABILITY_OPTIONS } from "@/types/partnerProfile"
-import type { PartnerProfile } from "@/types/partnerProfile"
-import SendRequestModal from "./SendRequestModal"
+import { useEffect, useState, useCallback } from 'react';
+import { Send, UserSearch } from 'lucide-react';
+
+import { useAuth } from '@/providers/AuthProvider';
+import { searchPartnerProfiles } from '@/lib/partners';
+import { SPORTS, AVAILABILITY_OPTIONS } from '@/types/partnerProfile';
+import type { PartnerProfile } from '@/types/partnerProfile';
+import SendRequestModal from './SendRequestModal';
+
+const selectCls = 'flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent cursor-pointer';
 
 export default function FindPartnersTab() {
-    const { user, userProfile } = useAuth()
+    const { user, userProfile } = useAuth();
 
-    const [profiles, setProfiles] = useState<PartnerProfile[]>([])
-    const [loading, setLoading] = useState(false)
-    const [sportFilter, setSportFilter] = useState("")
-    const [levelFilter, setLevelFilter] = useState("")
-    const [requestTarget, setRequestTarget] = useState<PartnerProfile | null>(null)
+    const [profiles, setProfiles] = useState<PartnerProfile[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [sportFilter, setSportFilter] = useState('');
+    const [levelFilter, setLevelFilter] = useState('');
+    const [requestTarget, setRequestTarget] = useState<PartnerProfile | null>(null);
+    const [sentUids, setSentUids] = useState<Set<string>>(new Set());
 
-    //track UIDs weve already sent requests to so the button updates stragit away
-    const [sentUids, setSentUids] = useState<Set<string>>(new Set())
-
-    // fetch profiles filtered by sport and/or skill level
-    // wrapped in usecallback so useeffect is stable
     const search = useCallback(async () => {
-        if (!user) return
-        setLoading(true)
+        if (!user) return;
+        setLoading(true);
         const results = await searchPartnerProfiles(
             user.uid,
             sportFilter || undefined,
             levelFilter || undefined,
-        )
-        setProfiles(results)
-        setLoading(false)
-    }, [user, sportFilter, levelFilter])
+        );
+        setProfiles(results);
+        setLoading(false);
+    }, [user, sportFilter, levelFilter]);
 
-    useEffect(() => { search() }, [search])
+    useEffect(() => { search(); }, [search]);
 
-    const senderName = `${userProfile?.firstName ?? ""} ${userProfile?.lastName ?? ""}`.trim()
+    const senderName = `${userProfile?.firstName ?? ''} ${userProfile?.lastName ?? ''}`.trim();
 
     return (
         <div className="space-y-4">
-            {/* filters */}
             <div className="flex flex-col sm:flex-row gap-3">
                 <select
                     value={sportFilter}
                     onChange={e => setSportFilter(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className={selectCls}
                 >
                     <option value="">All sports</option>
                     {SPORTS.map(sport => (
@@ -55,7 +53,7 @@ export default function FindPartnersTab() {
                 <select
                     value={levelFilter}
                     onChange={e => setLevelFilter(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className={selectCls}
                 >
                     <option value="">All levels</option>
                     <option value="beginner">Beginner</option>
@@ -64,7 +62,6 @@ export default function FindPartnersTab() {
                 </select>
             </div>
 
-            {/* results */}
             {loading ? (
                 <div className="space-y-3 animate-pulse">
                     {[...Array(3)].map((_, i) => (
@@ -90,16 +87,15 @@ export default function FindPartnersTab() {
                                     {profile.bio && (
                                         <p className="text-sm text-slate-600 mt-1">{profile.bio}</p>
                                     )}
-                                    {/* show up to 5 availability slots on card */}
                                     {profile.availability.length > 0 && (
                                         <div className="flex flex-wrap gap-1 mt-2">
                                             {profile.availability.slice(0, 5).map(slotValue => {
-                                                const slotLabel = AVAILABILITY_OPTIONS.find(option => option.value === slotValue)?.label ?? slotValue
+                                                const label = AVAILABILITY_OPTIONS.find(o => o.value === slotValue)?.label ?? slotValue;
                                                 return (
                                                     <span key={slotValue} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">
-                                                        {slotLabel}
+                                                        {label}
                                                     </span>
-                                                )
+                                                );
                                             })}
                                             {profile.availability.length > 5 && (
                                                 <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full">
@@ -109,14 +105,13 @@ export default function FindPartnersTab() {
                                         </div>
                                     )}
                                 </div>
-                                {/* button disables after sending to avoid duplicates */}
                                 <button
                                     onClick={() => setRequestTarget(profile)}
                                     disabled={sentUids.has(profile.uid)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 text-white rounded-lg text-xs font-medium hover:bg-sky-700 disabled:opacity-60 disabled:bg-slate-300 transition-colors shrink-0"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 text-white rounded-lg text-xs font-medium hover:bg-sky-700 disabled:opacity-60 disabled:bg-slate-300 disabled:cursor-not-allowed cursor-pointer transition-colors shrink-0"
                                 >
                                     <Send className="w-3.5 h-3.5" />
-                                    {sentUids.has(profile.uid) ? "Sent" : "Connect"}
+                                    {sentUids.has(profile.uid) ? 'Sent' : 'Connect'}
                                 </button>
                             </div>
                         </div>
@@ -124,7 +119,6 @@ export default function FindPartnersTab() {
                 </div>
             )}
 
-            {/* partner request modal */}
             {requestTarget && user && (
                 <SendRequestModal
                     target={requestTarget}
@@ -133,11 +127,11 @@ export default function FindPartnersTab() {
                     senderName={senderName}
                     onClose={() => setRequestTarget(null)}
                     onDone={() => {
-                        setSentUids(prevSentUids => new Set(prevSentUids).add(requestTarget.uid))
-                        setRequestTarget(null)
+                        setSentUids(prev => new Set(prev).add(requestTarget.uid));
+                        setRequestTarget(null);
                     }}
                 />
             )}
         </div>
-    )
+    );
 }
