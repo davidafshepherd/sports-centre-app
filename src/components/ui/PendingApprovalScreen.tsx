@@ -1,18 +1,18 @@
 'use client';
 
+import { Clock } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
-import { AlertCircle } from 'lucide-react';
 
-export default function ProfileErrorScreen() {
+export default function PendingApprovalScreen() {
     const { logout } = useAuth();
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen gap-6 p-4">
             <div className="flex flex-col items-center gap-3 text-center">
-                <AlertCircle className="w-12 h-12 text-red-400" />
-                <h1 className="text-xl font-semibold text-slate-900">Profile not found</h1>
+                <Clock className="w-12 h-12 text-amber-400" />
+                <h1 className="text-xl font-semibold text-slate-900">Awaiting approval</h1>
                 <p className="text-sm text-slate-500 max-w-sm">
-                    We could not load your profile. This may be a temporary issue, please sign out and try again.
+                    Your staff account is pending admin approval. You will be able to access the platform once an admin reviews your account.
                 </p>
             </div>
             <button

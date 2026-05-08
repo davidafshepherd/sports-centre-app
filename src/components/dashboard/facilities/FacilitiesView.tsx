@@ -51,7 +51,9 @@ export default function FacilitiesView() {
                 // Render empty state if there are no available facilities
                 <div className="text-center py-20 text-slate-500">
                     <Building2 className="w-12 h-12 mx-auto mb-3 text-slate-200" />
-                    <p className="font-medium text-slate-400">No facilities found.</p>
+                    <p className="font-medium text-slate-400">
+                        {userProfile?.role === 'staff' ? 'No facilities assigned.' : 'No facilities found.'}
+                    </p>
                 </div>
             ) : (
                 // Render facility cards

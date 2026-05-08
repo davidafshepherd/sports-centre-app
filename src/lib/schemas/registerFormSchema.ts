@@ -31,6 +31,7 @@ export const registerFormSchema = z
             county: z.string().min(1, 'County is required'),
             postcode: z.string().min(1, 'Postcode is required'),
         }),
+        role: z.enum(['member', 'staff']),
     })
     .refine((d) => d.password === d.confirmPassword, {
         message: 'Passwords do not match',

@@ -24,15 +24,17 @@ export default function RegisterFormCard({ onClose }: Props) {
     // Form submission error message
     const [submitError, setSubmitError] = useState<string | null>(null);
 
-    // Initialise form with Zod validation 
+    // Initialise form with Zod validation
     const form = useForm<RegisterForm>({
         resolver: zodResolver(registerFormSchema),
         mode: 'onChange',
+        defaultValues: { role: 'member' },
     });
 
-    // Watch password fields in form
+    // Watch form fields
     const passwordValue = useWatch({ control: form.control, name: 'password' });
     const confirmPasswordValue = useWatch({ control: form.control, name: 'confirmPassword' });
+    const role = useWatch({ control: form.control, name: 'role' });
 
     // Password match validation
     const confirmPasswordError =
@@ -89,7 +91,7 @@ export default function RegisterFormCard({ onClose }: Props) {
                 <form onSubmit={form.handleSubmit(onSubmit)} method="post" noValidate className="space-y-5">
                     {/* Form sections */}
                     <PersonalDetailsFieldset register={form.register} errors={form.formState.errors} />
-                    <AccountDetailsFieldset register={form.register} errors={form.formState.errors} confirmPasswordError={confirmPasswordError} />
+                    <AccountDetailsFieldset register={form.register} errors={form.formState.errors} confirmPasswordError={confirmPasswordError} setValue={form.setValue} role={role} />
                     <AddressFieldset register={form.register} errors={form.formState.errors} setValue={form.setValue} />
 
                     {/* Submission error message */}
