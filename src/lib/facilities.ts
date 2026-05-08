@@ -1,13 +1,14 @@
 import {
-    collection, 
-    doc, 
-    getDocs, 
-    getDoc, 
-    addDoc, 
+    collection,
+    doc,
+    getDocs,
+    getDoc,
+    addDoc,
     updateDoc,
-    query, 
-    where, 
-    arrayUnion, 
+    deleteDoc,
+    query,
+    where,
+    arrayUnion,
     arrayRemove,
 } from 'firebase/firestore';
 
@@ -82,7 +83,7 @@ export async function getFacilitiesForStaff(staffId: string): Promise<Facility[]
  * @returns Created facility's ID.
  */
 export async function createFacility(
-    data: Omit<Facility, 'id' | 'assignedStaffIds' | 'createdAt' | 'updatedAt'>,
+    data: Omit<Facility, 'id' | 'createdAt' | 'updatedAt'>,
 ): Promise<string> {
     // Create ISO datetime string for audit fields
     const now = new Date().toISOString();
@@ -90,7 +91,6 @@ export async function createFacility(
     // Add new facility document to Firestore
     const ref = await addDoc(collection(db, 'facilities'), {
         ...data,
-        assignedStaffIds: [],
         createdAt: now,
         updatedAt: now,
     });
@@ -148,4 +148,12 @@ export async function removeStaffFromFacility(facilityId: string, staffId: strin
         assignedStaffIds: arrayRemove(staffId),
         updatedAt: new Date().toISOString(),
     });
+}
+
+/**
+ * Deletes a facility.
+ * @param id Facility's ID.
+ */
+export async function deleteFacility(id: string): Promise<void> {
+    await deleteDoc(doc(db, 'facilities', id));
 }

@@ -63,16 +63,16 @@ export default function FacilityDetailsCard({ facility }: Props) {
                     </div>
                     {/* Facility pills */}
                     <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        {/* Facility category pill */}
-                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm ${cfg.text}`}>
-                            {CATEGORY_LABELS[facility.category]}
-                        </span>
                         {/* Facility inactive pill */}
                         {!facility.isActive && (
                             <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-red-500/90 backdrop-blur-sm text-white">
                                 Inactive
                             </span>
                         )}
+                        {/* Facility category pill */}
+                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm ${cfg.text}`}>
+                            {CATEGORY_LABELS[facility.category]}
+                        </span>
                     </div>
                 </div>
             </div>

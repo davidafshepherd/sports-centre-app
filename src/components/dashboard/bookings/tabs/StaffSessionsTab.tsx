@@ -17,11 +17,12 @@ import MemberAvatar from '../MemberAvatar';
 // Shape of component's props
 interface Props {
     bookings: Booking[];
+    assignedFacilities: Facility[];
     facilityMap: Record<string, Facility>;
     onLoad: () => void;
 }
 
-export default function StaffSessionsTab({ bookings, facilityMap, onLoad }: Props) {
+export default function StaffSessionsTab({ bookings, assignedFacilities, facilityMap, onLoad }: Props) {
     const { user } = useAuth();
     const [sortDir, setSortDir] = useState<SortDir>('asc');                                                             // Sort direction for the table
     const [filterFacility, setFilterFacility] = useState('');                                                           // Active facility filter
@@ -40,8 +41,8 @@ export default function StaffSessionsTab({ bookings, facilityMap, onLoad }: Prop
         onLoad();
     }
 
-    // Unique facility names from the current bookings, for the filter dropdown
-    const facilityOptions = [...new Set(bookings.map(b => b.facilityName))].sort();
+    // Names of facilities assigned to the staff member
+    const facilityOptions = assignedFacilities.map(f => f.name).sort();
 
     // Filter and sort the bookings
     const filteredBookings = bookings

@@ -294,3 +294,25 @@ export async function rejectAlternativeSuggestion(requestId: string): Promise<vo
 export async function cancelBookingRequest(requestId: string): Promise<void> {
     await deleteDoc(doc(db, 'bookingRequests', requestId));
 }
+
+/**
+ * Gets all booking requests for a facility.
+ * @param facilityId Facility's ID.
+ * @returns List of booking requests for the facility.
+ */
+export async function getBookingRequestsForFacility(facilityId: string): Promise<BookingRequest[]> {
+    const q = query(collection(db, 'bookingRequests'), where('facilityId', '==', facilityId));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as BookingRequest));
+}
+
+/**
+ * Cancels (deletes) all booking requests for a facility.
+ * Used when a facility is removed or deactivated.
+ * @param facilityId Facility's ID.
+ */
+export async function cancelBookingRequestsForFacility(facilityId: string): Promise<void> {
+    const q = query(collection(db, 'bookingRequests'), where('facilityId', '==', facilityId));
+    const snap = await getDocs(q);
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+}

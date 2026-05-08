@@ -31,20 +31,23 @@ export default function FacilityDetailsView({ facilityId }: Props) {
     const [showBookingRequest, setShowBookingRequest] = useState(false);                                // Whether the booking request modal is open
     const [activeRequest, setActiveRequest] = useState<BookingRequest | null | undefined>(undefined);   // Member's current request for this facility 
 
-    // Fetch facility from Firestore
+    // Fetch facility from Firestore (redirect staff away from non-assigned facilities)
     useEffect(() => {
         getFacilityById(facilityId).then((f) => {
-            if (!f) { 
-                router.replace("/facilities"); 
-                return; 
+            if (!f) {
+                router.replace("/facilities");
+                return;
             }
-
+            if (userProfile?.role === 'staff' && user && !f.assignedStaffIds.includes(user.uid)) {
+                router.replace('/facilities');
+                return;
+            }
             setFacility(f);
             setLoading(false);
         });
-    }, [facilityId, router]);
+    }, [facilityId, router, user, userProfile]);
 
-    // Fetches the member's booking request for the current facility (if it exists and active)
+    // Fetch the member's booking request for the current facility (if it exists and active)
     useEffect(() => {
         if (!user || role !== "member") return;
 

@@ -127,3 +127,24 @@ export async function cancelBooking(bookingId: string): Promise<void> {
         updatedAt: new Date().toISOString(),
     });
 }
+
+/**
+ * Cancels all upcoming bookings for a facility and notifies affected members.
+ * @param facilityId Facility's ID.
+ * @param reason Human-readable reason included in the cancellation notification.
+ */
+export async function cancelBookingsForFacility(facilityId: string, reason: string): Promise<void> {
+    const now = new Date().toISOString();
+    const bookings = await getUpcomingBookingsForFacility(facilityId);
+    await Promise.all(bookings.map(async (booking) => {
+        await updateDoc(doc(db, 'bookings', booking.id), { status: 'cancelled', updatedAt: now });
+        await createNotification({
+            userId: booking.memberId,
+            type: 'booking_cancelled',
+            title: 'Booking Cancelled',
+            message: `Your booking at ${booking.facilityName} on ${formatDate(booking.date)} has been cancelled due to ${reason}.`,
+            relatedId: booking.id,
+            relatedType: 'booking',
+        });
+    }));
+}

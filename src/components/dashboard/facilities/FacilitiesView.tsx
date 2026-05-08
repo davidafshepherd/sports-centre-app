@@ -4,24 +4,30 @@ import { useEffect, useState } from 'react';
 import { Building2 } from 'lucide-react';
 
 import { getActiveFacilities } from '@/lib/facilities';
+import { useAuth } from '@/providers/AuthProvider';
 import type { Facility } from '@/types/facility';
 
 import FacilityCard from './FacilityCard';
 
 export default function FacilitiesView() {
+    const { user, userProfile } = useAuth();                        // Authentication context
     const [facilities, setFacilities] = useState<Facility[]>([]);   // Fetched facilities
     const [loading, setLoading] = useState(true);                   // Whether facilities are still being fetched
 
-    // Fetch facilities from Firestore
+    // Fetch facilities from Firestore (filter to assigned facilities for staff)
     useEffect(() => {
         getActiveFacilities()
-            .then((f) => {
-                setFacilities(f);
+            .then((all) => {
+                if (userProfile?.role === 'staff' && user) {
+                    setFacilities(all.filter(f => f.assignedStaffIds.includes(user.uid)));
+                } else {
+                    setFacilities(all);
+                }
             })
             .finally(() => {
                 setLoading(false);
             });
-    }, []);
+    }, [user, userProfile]);
 
     // Render skeleton cards while facilities are being fetched
     if (loading) {

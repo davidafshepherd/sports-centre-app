@@ -11,6 +11,7 @@ interface Props {
 
 export default function BookingCardPhoto({ category, name }: Props) {
     const cfg = category ? CATEGORY_CONFIG[category] : null;
+    
     return (
         <div className="relative h-28 bg-slate-200 overflow-hidden">
             {/* Cover image */}

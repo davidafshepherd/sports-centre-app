@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminFacilitiesView from '@/components/dashboard/facilities/AdminFacilitiesView';
 import FacilitiesView from '@/components/dashboard/facilities/FacilitiesView';
 import LoadingScreen from '@/components/ui/LoadingScreen';
 
@@ -12,15 +14,17 @@ export default function FacilitiesPage() {
     const router = useRouter();
 
     // Navigate to root route if user is not authenticated
-    if (!user || !userProfile) { 
-        router.replace('/'); 
-        return <LoadingScreen /> ;
-    }
+    useEffect(() => {
+        if (!user || !userProfile) router.replace('/');
+    }, [user, userProfile, router]);
+
+    // Render loading screen if user is not authenticated (while redirect takes place)
+    if (!user || !userProfile) return <LoadingScreen />;
 
     // Render facilities view
     return (
         <DashboardLayout>
-            <FacilitiesView />
+            {userProfile.role === 'admin' ? <AdminFacilitiesView /> : <FacilitiesView />}
         </DashboardLayout>
     );
 }

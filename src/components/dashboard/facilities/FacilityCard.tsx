@@ -1,7 +1,10 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Clock, MapPin, Users } from 'lucide-react';
 
+import { useAuth } from '@/providers/AuthProvider';
 import { CATEGORY_CONFIG, CATEGORY_LABELS } from '@/types/facility';
 import type { Facility } from '@/types/facility';
 import { getTodayLabel } from '@/lib/utils/openingHours';
@@ -13,6 +16,7 @@ interface Props {
 }
 
 export default function FacilityCard({ facility, priority = false }: Props) {
+    const { userProfile } = useAuth();                  // Authentication context
     const cfg = CATEGORY_CONFIG[facility.category];     // Facility's configuration
     const Icon = cfg.icon;                              // Facility's icon
 
@@ -32,7 +36,7 @@ export default function FacilityCard({ facility, priority = false }: Props) {
                 {/* Dark overlay on top of image */}
                 <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
 
-                {/* Facility icon + category */}
+                {/* Facility icon + category pill */}
                 <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
                     <div className="p-2 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm">
                         <Icon className={`w-4 h-4 ${cfg.text}`} />
@@ -73,11 +77,11 @@ export default function FacilityCard({ facility, priority = false }: Props) {
             {/* Card footer */}
             <div className="px-5 pb-5">
                 {/* Facility details link */}
-                <Link 
+                <Link
                     className="flex w-full items-center justify-center gap-2 py-2.5 bg-sky-600 text-white rounded-xl text-sm font-medium hover:bg-sky-700 transition-colors"
                     href={`/facilities/${facility.id}`}
                 >
-                    View & Request <ArrowRight className="w-4 h-4" />
+                    {userProfile?.role === 'member' ? 'View & Request' : 'View'} <ArrowRight className="w-4 h-4" />
                 </Link>
             </div>
         </div>

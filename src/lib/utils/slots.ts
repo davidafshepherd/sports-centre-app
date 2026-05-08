@@ -1,5 +1,15 @@
-import type { Facility } from '@/types/facility';
+import type { Facility, OpeningHours } from '@/types/facility';
 import { JS_DAYS } from '@/lib/utils/openingHours';
+
+/**
+ * Returns the OpeningHours key for the day of a given date string.
+ * @param dateStr Date string in YYYY-MM-DD format.
+ * @returns Day name key (e.g. 'monday').
+ */
+export function getDayFromDate(dateStr: string): keyof OpeningHours {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return JS_DAYS[new Date(y, m - 1, d).getDay()] as keyof OpeningHours;
+}
 
 /**
  * Converts a time string (HH:MM) to total minutes from midnight.
