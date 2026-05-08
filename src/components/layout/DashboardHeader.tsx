@@ -8,12 +8,12 @@ import { getUnreadCount } from "@/lib/notifications"
 import NotificationsDrawer from "@/components/dashboard/notifications/NotificationsDrawer"
 
 const PAGE_TITLES: Record<string, string> = {
-    "/":                  "Dashboard",
-    "/facilities":        "Facilities",
-    "/bookings":          "Bookings",
-    "/partners":          "Find Partners",
+    "/": "Dashboard",
+    "/facilities": "Facilities",
+    "/bookings": "Bookings",
+    "/partners": "Find Partners",
     "/equipment-reports": "Equipment Reports",
-    "/members":           "Members",
+    "/members": "Members",
 }
 
 interface Props {

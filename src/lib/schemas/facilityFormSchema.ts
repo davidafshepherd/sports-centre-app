@@ -11,7 +11,7 @@ const dayHoursSchema = z.object({
 // Schema for facility form input validation
 export const facilityFormSchema = z.object({
     name: z.string().trim().min(1, 'Name is required.'),
-    category: z.enum(['badminton', 'football', 'squash', 'tennis', 'gym', 'swimming']),
+    category: z.enum(['badminton', 'basketball', 'cricket', 'football', 'gym', 'squash', 'swimming', 'tennis', 'yoga']),
     description: z.string().trim().min(1, 'Description is required.'),
     location: z.string().trim().min(1, 'Location is required.'),
     maxCapacity: z.number().int().min(1, 'Capacity must be at least 1.'),

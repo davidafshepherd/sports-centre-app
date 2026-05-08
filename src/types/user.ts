@@ -1,5 +1,5 @@
 export type UserRole = 'member' | 'staff' | 'admin';
-export type MembershipStatus = 'active' | 'suspended' | 'cancelled';
+export type MembershipStatus = 'active' | 'pending' | 'suspended' | 'cancelled';
 
 export interface Address {
     line1: string;
