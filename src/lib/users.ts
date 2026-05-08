@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
 import type { MembershipStatus, UserProfile } from '@/types/user';
@@ -45,4 +45,12 @@ export async function updateUserProfile(
     data: Partial<Pick<UserProfile, 'firstName' | 'lastName' | 'dateOfBirth' | 'address'>>,
 ): Promise<void> {
     await updateDoc(doc(db, 'users', id), data as Record<string, unknown>);
+}
+
+/**
+ * Deletes a user's Firestore profile.
+ * @param id User's ID.
+ */
+export async function deleteUserProfile(id: string): Promise<void> {
+    await deleteDoc(doc(db, 'users', id));
 }
