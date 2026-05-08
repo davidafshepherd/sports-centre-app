@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CalendarDays, XCircle, ArrowRight } from 'lucide-react';
+import { CalendarDays, XCircle, ArrowRight, TriangleAlert } from 'lucide-react';
+import { deleteUser } from 'firebase/auth';
 
 import { getBookingsForMember, cancelBooking } from '@/lib/bookings';
 import { getBookingRequestsForMember } from '@/lib/bookingRequests';
+import { deleteUserProfile } from '@/lib/users';
 import { useAuth } from '@/providers/AuthProvider';
 import { formatSlot } from '@/lib/utils/date';
 import type { Booking } from '@/types/booking';
@@ -14,15 +16,16 @@ import type { BookingRequest } from '@/types/bookingRequest';
 import ProfileCard from './ProfileCard';
 
 export default function MemberDashboard() {
-    const { user, userProfile } = useAuth();                                      // Access authentication ontext
+    const { user, userProfile } = useAuth();                                      // Access authentication context
     const [activeRequests, setActiveRequests] = useState<BookingRequest[]>([]);   // All active booking requests
     const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);      // All upcoming bookings
     const [todayBookings, setTodayBookings] = useState<Booking[]>([]);            // Today's upcoming bookings (up to 3)
     const [loading, setLoading] = useState(true);                                 // Whether data is still being fetched
-
-    const [cancelling, setCancelling] = useState<string | null>(null);                      // ID of the booking being cancelled
-    const [loadKey, setLoadKey] = useState(0);                                              // Counter incremented to trigger a re-fetch
-    const reload = useCallback(() => { setLoading(true); setLoadKey(k => k + 1); }, []);    // Trigger a data re-fetch
+    const [cancelling, setCancelling] = useState<string | null>(null);            // ID of the booking being cancelled
+    const [loadKey, setLoadKey] = useState(0);                                    // Counter incremented to trigger a re-fetch
+    const reload = useCallback(() => { setLoading(true); setLoadKey(k => k + 1); }, []); // Trigger a data re-fetch
+    const [confirmCancel, setConfirmCancel] = useState(false);                    // Whether the cancel membership modal is open
+    const [deletingAccount, setDeletingAccount] = useState(false);               // Whether account deletion is in progress
 
     // Fetch the member's active booking requests and upcoming bookings from Firestore
     useEffect(() => {
@@ -49,6 +52,14 @@ export default function MemberDashboard() {
         await cancelBooking(id);
         setCancelling(null);
         reload();
+    }
+
+    // Function used to permanently delete the member's account
+    async function handleCancelMembership() {
+        if (!user) return;
+        setDeletingAccount(true);
+        await deleteUserProfile(user.uid);
+        await deleteUser(user);
     }
 
     return (
@@ -86,12 +97,12 @@ export default function MemberDashboard() {
                     </Link>
                 </div>
                 {loading ? (
-                    // Render skeleton while sessions are being fetched
+                    // Loading skeleton
                     <div className="space-y-2 animate-pulse">
                         {[...Array(2)].map((_, i) => <div key={i} className="h-14 bg-slate-100 rounded-xl" />)}
                     </div>
                 ) : todayBookings.length === 0 ? (
-                    // Render empty state if there are no bookings today
+                    // Empty state
                     <div className="bg-white rounded-xl border border-slate-200 py-10 flex flex-col items-center gap-2 text-slate-400">
                         <CalendarDays className="w-8 h-8 text-slate-200" />
                         <p className="text-sm">No bookings today.</p>
@@ -118,6 +129,54 @@ export default function MemberDashboard() {
                     </div>
                 )}
             </section>
+
+            {/* Cancel membership button */}
+            <div className="pt-6 border-t border-slate-200 flex justify-center">
+                <button
+                    onClick={() => setConfirmCancel(true)}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 border border-red-200 rounded-xl hover:bg-red-50 hover:border-red-300 cursor-pointer transition-colors"
+                >
+                    <TriangleAlert className="w-4 h-4 shrink-0" />
+                    Cancel membership
+                </button>
+            </div>
+
+            {/* Cancel membership confirmation modal */}
+            {confirmCancel && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+                    onClick={e => { if (e.target === e.currentTarget) setConfirmCancel(false); }}
+                >
+                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl">
+                        {/* Header */}
+                        <div className="px-6 py-5 border-b border-slate-100 flex items-center gap-3">
+                            <TriangleAlert className="w-5 h-5 text-red-500 shrink-0" />
+                            <h2 className="font-semibold text-slate-900">Cancel membership</h2>
+                        </div>
+                        {/* Body */}
+                        <div className="px-6 py-5 space-y-4">
+                            <p className="text-sm text-slate-600">
+                                Are you sure? This will permanently delete your account and all associated data. This cannot be undone.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:enabled:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                    onClick={handleCancelMembership}
+                                    disabled={deletingAccount}
+                                >
+                                    {deletingAccount ? 'Deleting…' : 'Yes'}
+                                </button>
+                                <button
+                                    className="flex-1 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    onClick={() => setConfirmCancel(false)}
+                                >
+                                    Go back
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
