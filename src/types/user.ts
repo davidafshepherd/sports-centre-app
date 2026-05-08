@@ -20,3 +20,16 @@ export interface UserProfile {
     membershipStatus: MembershipStatus;
     createdAt: string;      // ISO date string (YYYY-MM-DD)
 }
+
+export const STATUS_FILTERS: { label: string; value: MembershipStatus | 'all' }[] = [
+    { label: 'All', value: 'all' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Active', value: 'active' },
+    { label: 'Suspended', value: 'suspended' },
+];
+
+export const STATUS_BADGE: Partial<Record<MembershipStatus, string>> = {
+    active: 'bg-emerald-500 text-white',
+    pending: 'bg-sky-500 text-white',
+    suspended: 'bg-amber-500 text-white',
+};

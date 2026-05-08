@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, Check, CheckCheck, Bell, Building2, CalendarDays, UserCheck, UserX, Wrench } from 'lucide-react';
+import { X, Check, CheckCheck, Bell } from 'lucide-react';
 
 import { formatRelativeTime } from '@/lib/utils/date';
 import {
@@ -11,47 +11,27 @@ import {
     deleteNotifications,
 } from '@/lib/notifications';
 import { useAuth } from '@/providers/AuthProvider';
-import type { Notification, NotificationType } from '@/types/notification';
-
-// Maps a notification type to its icon
-function notifIcon(type: NotificationType) {
-    if (type.startsWith('booking'))            return <CalendarDays className="w-4 h-4" />;
-    if (type === 'partner_accepted')           return <UserCheck className="w-4 h-4" />;
-    if (type === 'partner_rejected')           return <UserX className="w-4 h-4" />;
-    if (type === 'partner_request')            return <UserCheck className="w-4 h-4" />;
-    if (type === 'equipment_report_updated')   return <Wrench className="w-4 h-4" />;
-    if (type === 'facility_updated')           return <Building2 className="w-4 h-4" />;
-    return <Bell className="w-4 h-4" />;
-}
-
-// Maps a notification type to its icon background and text colour classes
-function notifIconColour(type: NotificationType): string {
-    if (type === 'booking_approved' || type === 'partner_accepted') return 'bg-green-100 text-green-600';
-    if (type === 'booking_rejected' || type === 'partner_rejected') return 'bg-red-100 text-red-600';
-    if (type === 'booking_completed')          return 'bg-slate-100 text-slate-500';
-    if (type === 'booking_alternative')        return 'bg-blue-100 text-blue-600';
-    if (type === 'booking_cancelled')          return 'bg-red-100 text-red-600';
-    if (type === 'booking_request_received')   return 'bg-amber-100 text-amber-600';
-    if (type === 'booking_confirmed_staff')    return 'bg-sky-100 text-sky-600';
-    if (type === 'partner_request')            return 'bg-sky-100 text-sky-600';
-    if (type === 'equipment_report_updated')   return 'bg-orange-100 text-orange-600';
-    if (type === 'facility_updated')           return 'bg-sky-100 text-sky-600';
-    return 'bg-slate-100 text-slate-500';
-}
+import type { Notification } from '@/types/notification';
+import { 
+    NOTIFICATION_ICON, 
+    NOTIFICATION_COLOUR, 
+    NOTIFICATION_ICON_FALLBACK, 
+    NOTIFICATION_COLOUR_FALLBACK, 
+} from '@/types/notification';
 
 // Shape of component's props
 interface Props {
-    open: boolean;
-    onClose: () => void;
+    open: boolean;          // Whether the notification drawer is open
+    onClose: () => void;    // Function used to close the notification drawer
 }
 
 export default function NotificationsDrawer({ open, onClose }: Props) {
-    const { user } = useAuth();
-    const [notifications, setNotifications] = useState<Notification[]>([]);   // All notifications for the user
-    const [loading, setLoading] = useState(false);                             // Whether notifications are being fetched
-    const [markingAll, setMarkingAll] = useState(false);                       // Whether mark-all-read is in progress
+    const { user } = useAuth();                                             // Access authentication context
+    const [notifications, setNotifications] = useState<Notification[]>([]); // All notifications for the user
+    const [loading, setLoading] = useState(false);                          // Whether notifications are still being fetched
+    const [markingAll, setMarkingAll] = useState(false);                    // Whether mark-all-read is in progress
 
-    // Fetch when the drawer opens
+    // Fetch all notifications for the user from Firestore
     useEffect(() => {
         if (!open || !user) return;
         const uid = user.uid;
@@ -62,6 +42,7 @@ export default function NotificationsDrawer({ open, onClose }: Props) {
             .finally(() => setLoading(false));
     }, [open, user]);
 
+    // Function used to mark a notification for the user as read
     async function handleMarkRead(notif: Notification) {
         if (notif.read) return;
         await markNotificationRead(notif.id);
@@ -70,6 +51,7 @@ export default function NotificationsDrawer({ open, onClose }: Props) {
         );
     }
 
+    // Function used to mark all notifications for the user as read
     async function handleMarkAllRead() {
         if (!user) return;
         setMarkingAll(true);
@@ -78,8 +60,10 @@ export default function NotificationsDrawer({ open, onClose }: Props) {
         setMarkingAll(false);
     }
 
-    const unread = notifications.filter(n => !n.read).length;   // Count of unread notifications
+    // Number of unread notifications
+    const unread = notifications.filter(n => !n.read).length;
 
+    // Function used to close the notification drawer
     function handleClose() {
         const readIds = notifications.filter(n => n.read).map(n => n.id);
         if (readIds.length > 0) deleteNotifications(readIds);
@@ -158,7 +142,9 @@ export default function NotificationsDrawer({ open, onClose }: Props) {
                     ) : (
                         // Notifications list
                         <ul className="divide-y divide-slate-100">
-                            {notifications.map(notif => (
+                            {notifications.map(notif => {
+                                const Icon = NOTIFICATION_ICON[notif.type] ?? NOTIFICATION_ICON_FALLBACK;
+                                return (
                                 <li
                                     key={notif.id}
                                     className={`flex items-stretch ${notif.read ? '' : 'bg-sky-50'}`}
@@ -166,8 +152,8 @@ export default function NotificationsDrawer({ open, onClose }: Props) {
                                     {/* Content */}
                                     <div className="flex items-start gap-3 px-4 py-3.5 flex-1 min-w-0">
                                         {/* Icon */}
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${notifIconColour(notif.type)}`}>
-                                            {notifIcon(notif.type)}
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${NOTIFICATION_COLOUR[notif.type] ?? NOTIFICATION_COLOUR_FALLBACK}`}>
+                                            <Icon className="w-4 h-4" />
                                         </div>
 
                                         {/* Text */}
@@ -204,7 +190,8 @@ export default function NotificationsDrawer({ open, onClose }: Props) {
                                         <Check className="w-4 h-4" />
                                     </button>
                                 </li>
-                            ))}
+                                );
+                            })}
                         </ul>
                     )}
                 </div>

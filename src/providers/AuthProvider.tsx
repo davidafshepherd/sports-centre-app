@@ -101,8 +101,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email: data.email,
                 dateOfBirth: data.dateOfBirth,
                 address: data.address,
-                role: "member",
-                membershipStatus: "active",
+                role: data.role,
+                membershipStatus: data.role === 'staff' ? 'pending' : 'active',
                 createdAt: new Date().toISOString().split("T")[0],
             });
 

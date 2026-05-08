@@ -1,18 +1,18 @@
 'use client';
 
+import { Ban } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
-import { AlertCircle } from 'lucide-react';
 
-export default function ProfileErrorScreen() {
+export default function SuspendedScreen() {
     const { logout } = useAuth();
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen gap-6 p-4">
             <div className="flex flex-col items-center gap-3 text-center">
-                <AlertCircle className="w-12 h-12 text-red-400" />
-                <h1 className="text-xl font-semibold text-slate-900">Profile not found</h1>
+                <Ban className="w-12 h-12 text-red-400" />
+                <h1 className="text-xl font-semibold text-slate-900">Account suspended</h1>
                 <p className="text-sm text-slate-500 max-w-sm">
-                    We could not load your profile. This may be a temporary issue, please sign out and try again.
+                    Your account has been suspended. Please contact an admin if you believe this is a mistake.
                 </p>
             </div>
             <button

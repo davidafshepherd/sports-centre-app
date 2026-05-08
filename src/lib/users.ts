@@ -1,7 +1,7 @@
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
-import type { UserProfile } from '@/types/user';
+import type { MembershipStatus, UserProfile } from '@/types/user';
 
 /**
  * Gets all users with the 'staff' role.
@@ -14,9 +14,9 @@ export async function getStaffUsers(): Promise<UserProfile[]> {
 }
 
 /**
- * Gets multiple user profiles by UID.
- * @param ids Array of user UIDs.
- * @returns List of user profiles for the given UIDs.
+ * Gets multiple user profiles by ID.
+ * @param ids Array of user IDs.
+ * @returns List of user profiles for the given IDs.
  */
 export async function getUsersByIds(ids: string[]): Promise<UserProfile[]> {
     if (ids.length === 0) return [];
@@ -24,4 +24,13 @@ export async function getUsersByIds(ids: string[]): Promise<UserProfile[]> {
     return snaps
         .filter(s => s.exists())
         .map(s => ({ uid: s.id, ...s.data() } as UserProfile));
+}
+
+/**
+ * Updates the membership status of a user.
+ * @param id User's ID.
+ * @param status New membership status.
+ */
+export async function updateUserMembershipStatus(id: string, status: MembershipStatus): Promise<void> {
+    await updateDoc(doc(db, 'users', id), { membershipStatus: status });
 }
