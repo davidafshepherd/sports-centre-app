@@ -52,7 +52,7 @@ export default function ProfileCard() {
     const addr = userProfile?.address;
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white rounded-xl border border-slate-200 p-6 h-full min-w-0">
             {/* Header */}
             <div className="flex items-start justify-between gap-4">
                 {/* Avatar, name, email and status */}
