@@ -1,6 +1,6 @@
 # Sports Centre App
-- [public](public) contains static assets and files.
 - [src](src) contains the source code.
+- [public](public) contains static assets and files.
 
 The application is deployed on Microsoft Azure and can be accessed [here](https://ambitious-field-08dfb1f10.7.azurestaticapps.net/).
 #
