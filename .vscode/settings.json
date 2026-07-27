@@ -1,4 +1,0 @@
-{
-    "appService.defaultWebAppToDeploy": "/subscriptions/5b620e29-b854-49d7-bea8-3bda755937f5/resourceGroups/appservisons/providers/Microsoft.Web/sites/stayactive",
-    "appService.deploySubpath": "."
-}
