@@ -1,36 +1,19 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sports Centre App
+- [public](public) contains static assets and files.
+- [src](src) contains the source code.
 
-## Getting Started
+The application is deployed on Microsoft Azure and is available to view [here](https://ambitious-field-08dfb1f10.7.azurestaticapps.net/).
+#
+![image](https://github.com/user-attachments/assets/791cbf66-8005-430e-b744-fcd697d37357)
 
-First, run the development server:
+![image](https://github.com/user-attachments/assets/e439deea-5514-4f76-ad7a-104af059f19c)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+![image](https://github.com/user-attachments/assets/cae82657-785c-4f2d-8853-5682c8558655)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+![image](https://github.com/user-attachments/assets/6afb3590-3be1-451e-b2af-1d231b67f5b8)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+![image](https://github.com/user-attachments/assets/20346a17-e130-4eae-9609-a0d0a509e263)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+![image](https://github.com/user-attachments/assets/a4fdf493-3472-4828-b1eb-730393b54462)
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+![image](https://github.com/user-attachments/assets/54beef51-a042-4309-86fb-c25b962fedd4)
