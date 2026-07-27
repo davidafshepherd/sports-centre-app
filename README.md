@@ -2,7 +2,7 @@
 - [public](public) contains static assets and files.
 - [src](src) contains the source code.
 
-The application is deployed on Microsoft Azure and is available to view [here](https://ambitious-field-08dfb1f10.7.azurestaticapps.net/).
+The application is deployed on Microsoft Azure and can be accessed [here](https://ambitious-field-08dfb1f10.7.azurestaticapps.net/).
 #
 ![image](https://github.com/user-attachments/assets/791cbf66-8005-430e-b744-fcd697d37357)
 
